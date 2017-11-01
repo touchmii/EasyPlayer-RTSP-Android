@@ -71,6 +71,17 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/server_port"/>
 
+        <CheckBox
+            android:id="@+id/sw_codec"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="使用FFMPEG进行视频解码"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/transport_mode" />
 
         <CheckBox
             android:id="@+id/auto_record"
@@ -82,7 +93,7 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/transport_mode" />
+            app:layout_constraintTop_toBottomOf="@+id/sw_codec" />
 
         <Button
             android:layout_width="0dp"

@@ -712,6 +712,9 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                         if (mCodec == null && mDecoder == null) {
                             frameInfo = mQueue.takeVideoFrame();
                             try {
+                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false)){
+                                    throw new IllegalStateException("user set sw codec");
+                                }
                                 final String mime = frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264 ? "video/avc" : "video/hevc";
                                 MediaFormat format =  MediaFormat.createVideoFormat(mime, mWidth, mHeight);
                                 format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0);
@@ -830,7 +833,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                                 newSleepUs = 0l;
                                             } else {
                                                 long cache = mNewestStample - previewStampUs;
-                                                newSleepUs = fixSleepTime(sleepUs, cache, 800000);
+                                                newSleepUs = fixSleepTime(sleepUs, cache, 100000);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
                                             }
                                         }
