@@ -1,1 +1,1 @@
-include ':EasyPlayer',':rtspclient'
+include ':EasyPlayer',':rtspclient', ':myapplication'
