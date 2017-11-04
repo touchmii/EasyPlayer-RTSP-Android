@@ -780,10 +780,14 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
 
                                 if (previewStampUs != 0l) {
                                     long sleepTime = current - previewStampUs - decodeSpend * 1000;
+                                    if (sleepTime>50000){
+                                        Log.w(TAG,"sleep time.too long:" + sleepTime);
+                                        sleepTime = 50000;
+                                    }
                                     if (sleepTime > 0) {
                                         sleepTime %= 100000;
                                         long cache = mNewestStample - frameInfo.stamp;
-                                        sleepTime = fixSleepTime(sleepTime, cache, 0);
+                                        sleepTime = fixSleepTime(sleepTime, cache, -100000);
                                         if (sleepTime > 0) {
                                             Thread.sleep(sleepTime / 1000);
                                         }
@@ -828,12 +832,13 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                         boolean firstTime = previewStampUs == 0l;
                                         if (!firstTime) {
                                             long sleepUs = (info.presentationTimeUs - previewStampUs);
-                                            if (sleepUs > 1000000) {
+                                            if (sleepUs > 50000) {
                                                 // 时间戳异常，可能服务器丢帧了。
-                                                newSleepUs = 0l;
+                                                Log.w(TAG,"sleep time.too long:" + sleepUs);
+                                                newSleepUs = 50000;
                                             } else {
                                                 long cache = mNewestStample - previewStampUs;
-                                                newSleepUs = fixSleepTime(sleepUs, cache, 100000);
+                                                newSleepUs = fixSleepTime(sleepUs, cache, -100000);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
                                             }
                                         }
