@@ -119,7 +119,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         if (!mStreamRender.isRecording()) {
             File f = new File(TheApp.sMoviePath);
             f.mkdirs();
-            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath());
+            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy_MM_dd HH_mm_ss").format(new Date()) + ".mp4").getPath());
             return true;
         } else {
             mStreamRender.stopRecord();

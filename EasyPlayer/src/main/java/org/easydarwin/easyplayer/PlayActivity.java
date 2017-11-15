@@ -106,7 +106,7 @@ public class PlayActivity extends AppCompatActivity {
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
             File file = new File(TheApp.sPicturePath);
             file.mkdirs();
-            file = new File(file, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".jpg");
+            file = new File(file, new SimpleDateFormat("yy_MM_dd HH_mm_ss").format(new Date()) + ".jpg");
             mRenderFragment.takePicture(file.getPath());
             if (mSoundPool != null) {
                 mSoundPool.play(mTalkPictureSound, mAudioVolumn, mAudioVolumn, 1, 0, 1.0f);
@@ -522,7 +522,7 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     public void setNavVisibility(boolean visible) {
-        if (!ViewConfigurationCompat.hasPermanentMenuKey(ViewConfiguration.get(this))) {
+        if (!ViewConfiguration.get(this).hasPermanentMenuKey()) {
             int newVis = View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
             if (!visible) {
                 // } else {
