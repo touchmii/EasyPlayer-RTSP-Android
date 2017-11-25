@@ -410,6 +410,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
             @Override
             public void run() {
                 {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
                     RTSPClient.FrameInfo frameInfo;
                     long handle = 0;
                     final AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
@@ -479,7 +480,12 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                     pumpPCMSample(mBufferReuse, outLen[0], frameInfo.stamp);
                                 }
                                 if (mAudioEnable)
-                                    mAudioTrack.write(mBufferReuse, 0, outLen[0]);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        mAudioTrack.write(mBufferReuse, 0, outLen[0],AudioTrack.WRITE_NON_BLOCKING);
+                                    }else {
+                                        mAudioTrack.write(mBufferReuse, 0, outLen[0]);
+                                    }
+
                             }
                             frameInfo = null;
                         }
@@ -694,7 +700,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
             @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
             @Override
             public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
                 MediaCodec mCodec = null;
                 VideoCodec.VideoDecoderLite mDecoder = null;
                 try {
@@ -791,6 +797,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                         if (sleepTime > 0) {
                                             Thread.sleep(sleepTime / 1000);
                                         }
+                                        Log.d(TAG,"cache:" + cache);
                                     }
                                 }
                                 previewStampUs = current;
@@ -835,11 +842,13 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                             if (sleepUs > 50000) {
                                                 // 时间戳异常，可能服务器丢帧了。
                                                 Log.w(TAG,"sleep time.too long:" + sleepUs);
-                                                newSleepUs = 50000;
-                                            } else {
+                                                sleepUs = 50000;
+                                            }
+                                            {
                                                 long cache = mNewestStample - previewStampUs;
                                                 newSleepUs = fixSleepTime(sleepUs, cache, -100000);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
+                                                Log.d(TAG,"cache:" + cache);
                                             }
                                         }
                                         previewStampUs = info.presentationTimeUs;
@@ -886,7 +895,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
             totalTimestampDifferUs = 0;
         }
         double dValue = ((double) (delayUs - totalTimestampDifferUs)) / 1000000d;
-        double radio = Math.exp(dValue);
+        double radio = Math.pow(30,dValue);
         final double r = sleepTimeUs * radio + 0.5f;
 //        Log.d(TAG,String.format("fixSleepTime %d,%d,%d->%d", sleepTimeUs, totalTimestampDifferUs, delayUs, (long) r));
         return (long) r;
