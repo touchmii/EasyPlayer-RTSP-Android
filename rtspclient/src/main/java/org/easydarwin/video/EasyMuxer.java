@@ -4,6 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -25,7 +26,7 @@ public class EasyMuxer {
     private int index = 0;
     private int mVideoTrackIndex = -1;
     private int mAudioTrackIndex = -1;
-    private long mBeginMillis;
+    private long mBeginMillis = -1l;
     private MediaFormat mVideoFormat;
     private MediaFormat mAudioFormat;
 
@@ -66,7 +67,6 @@ public class EasyMuxer {
                     if (VERBOSE)
                         Log.i(TAG, "both audio and video added,and muxer is started");
                     mMuxer.start();
-                    mBeginMillis = System.currentTimeMillis();
                 }
             } else {
                 if (format != null) {
@@ -78,7 +78,6 @@ public class EasyMuxer {
                 }
                 if (mVideoTrackIndex != -1) {
                     mMuxer.start();
-                    mBeginMillis = System.currentTimeMillis();
                 }
             }
         }
@@ -91,6 +90,16 @@ public class EasyMuxer {
         }
         if (!isVideo){
             if (mAudioTrackIndex == -1) return;
+        }
+        else{
+            if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0){
+                Log.w(TAG, String.format("pumpStream [%s] and key frame gotten ... and set mBeginMillis", isVideo ? "video" : "audio"));
+                mBeginMillis = SystemClock.elapsedRealtime();
+            }
+        }
+        if (mBeginMillis < 0) {
+            Log.w(TAG, String.format("pumpStream [%s] but key frame not gotten yet.ignore..", isVideo ? "video" : "audio"));
+            return;
         }
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
             // The codec config data was pulled out and fed to the muxer when we got
@@ -116,7 +125,7 @@ public class EasyMuxer {
                 Log.i(TAG, "BUFFER_FLAG_END_OF_STREAM received");
         }
 
-        if (System.currentTimeMillis() - mBeginMillis >= durationMillis) {
+        if (SystemClock.elapsedRealtime() - mBeginMillis >= durationMillis && isVideo && (bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 if (VERBOSE)
                     Log.i(TAG, String.format("record file reach expiration.create new file:" + index));
@@ -128,6 +137,7 @@ public class EasyMuxer {
                     mMuxer = new MediaMuxer(mFilePath + "-" + index++ + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
                     addTrack(mVideoFormat, true);
                     addTrack(mAudioFormat, false);
+                    pumpStream(outputBuffer, bufferInfo, isVideo);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -138,7 +148,7 @@ public class EasyMuxer {
     public synchronized void release() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             if (mMuxer != null) {
-                if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1) {
+                if (mAudioTrackIndex != -1 || mVideoTrackIndex != -1) {
                     if (VERBOSE)
                         Log.i(TAG, String.format("muxer is started. now it will be stoped."));
                     try {
