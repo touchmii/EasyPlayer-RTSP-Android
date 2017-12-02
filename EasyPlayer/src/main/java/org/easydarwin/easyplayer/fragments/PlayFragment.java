@@ -1,6 +1,7 @@
 package org.easydarwin.easyplayer.fragments;
 
 
+import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -198,7 +200,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 super.onReceiveResult(resultCode, resultData);
-                PlayActivity activity = (PlayActivity) getActivity();
+                Activity activity = getActivity();
                 if (activity == null)return;
                 if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
 
@@ -221,11 +223,15 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 //                    if (errorcode != 0){
 //                        stopRending();
 //                    }
-                    activity.onEvent(PlayFragment.this, errorcode,resultData.getString("event-msg"));
+                    if (activity instanceof PlayActivity) {
+                        ((PlayActivity)activity).onEvent(PlayFragment.this, errorcode, resultData.getString("event-msg"));
+                    }
                 }else if (resultCode == EasyRTSPClient.RESULT_RECORD_BEGIN){
-                    activity.onRecordState(1);
+                    if (activity instanceof PlayActivity)
+                        ((PlayActivity)activity).onRecordState(1);
                 }else if (resultCode == EasyRTSPClient.RESULT_RECORD_END){
-                    activity.onRecordState(-1);
+                    if (activity instanceof PlayActivity)
+                        ((PlayActivity)activity).onRecordState(-1);
                 }
             }
         };
@@ -331,7 +337,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             }
         });
         cover.setVisibility(View.GONE);
-        mRR.send(RESULT_REND_VIDEO_DISPLAYED, null);
+        sendResult(RESULT_REND_VIDEO_DISPLAYED, null);
     }
 
     @Override
@@ -390,7 +396,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
-        mRR.send(RESULT_REND_STARTED, null);
+        sendResult(RESULT_REND_STARTED, null);
+
+    }
+
+    private void sendResult(int resultCode, Bundle resultData) {
+        if (mRR != null)
+        mRR.send(resultCode, resultData);
     }
 
     @Override
@@ -414,7 +426,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     private void stopRending() {
         if (mStreamRender != null) {
-            mRR.send(RESULT_REND_STOPED, null);
+            sendResult(RESULT_REND_STOPED, null);
             mStreamRender.stop();
             mStreamRender = null;
         }
