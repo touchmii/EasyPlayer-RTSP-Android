@@ -906,7 +906,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         if (mMediaInfo == null || mWidth == 0 || mHeight == 0 || mCSD0 == null || mCSD1 == null)
             return;
         mRecordingPath = path;
-        mObject = new EasyAACMuxer(path, Integer.MAX_VALUE);
+        mObject = new EasyAACMuxer(path, mMediaInfo.sample != 0, Integer.MAX_VALUE);
         MediaFormat format = new MediaFormat();
         format.setInteger(MediaFormat.KEY_WIDTH, mWidth);
         format.setInteger(MediaFormat.KEY_HEIGHT, mHeight);
@@ -936,8 +936,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                 format.setByteBuffer("csd-" + j, ByteBuffer.wrap(bytes.get(j)));
             }
             mObject.addTrack(format, false);
-        }else{
-            mObject.addTrack(null, false);
         }
         ResultReceiver rr = mRR;
         if (rr != null) {

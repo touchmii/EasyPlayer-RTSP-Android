@@ -22,8 +22,8 @@ public class EasyAACMuxer extends EasyMuxer {
 
     private MediaFormat mAudioFormat;
 
-    public EasyAACMuxer(String path, long durationMillis) {
-        super(path, durationMillis);
+    public EasyAACMuxer(String path, boolean hasAudio, long durationMillis) {
+        super(path, hasAudio, durationMillis);
     }
 
     @Override
