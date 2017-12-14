@@ -382,7 +382,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     protected void startRending(SurfaceTexture surface) {
         /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
          */
-        mStreamRender = new EasyRTSPClient(getContext(), "79393674363536526D34324148304E5A70727A66792B5A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F50394C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35", new Surface(surface), mResultReceiver);
+        mStreamRender = new EasyRTSPClient(getContext(), "79393674363536526D343041484339617064446A70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35", new Surface(surface), mResultReceiver);
 
         boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
 
