@@ -357,6 +357,20 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         }
     }
 
+    public void pause(){
+        mQueue.clear();
+        if (mClient != null) {
+            mClient.pause();
+        }
+        mQueue.clear();
+    }
+
+    public void resume(){
+        if (mClient != null) {
+            mClient.resume();
+        }
+    }
+
     /**
      * 终止播放
      */
@@ -877,7 +891,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                     e.printStackTrace();
                 } finally {
                     if (mCodec != null) {
-                        mCodec.stop();
+//                        mCodec.stop();
                         mCodec.release();
                     }
                     if (mDecoder != null) {
@@ -1026,6 +1040,20 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onRTSPSourceCallBack(int _channelId, int _channelPtr, int _frameType, RTSPClient.FrameInfo frameInfo) {
+        long begin = SystemClock.elapsedRealtime();
+        try{
+            onRTSPSourceCallBack1(_channelId, _channelPtr, _frameType, frameInfo);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }finally {
+            Log.d(TAG, String.format("onRTSPSourceCallBack %d", SystemClock.elapsedRealtime() - begin));
+        }
+    }
+
+
+    public void onRTSPSourceCallBack1(int _channelId, int _channelPtr, int _frameType, RTSPClient.FrameInfo frameInfo) {
+
+
         Thread.currentThread().setName("PRODUCER_THREAD");
         if (frameInfo != null) {
             mReceivedDataLength += frameInfo.length;
