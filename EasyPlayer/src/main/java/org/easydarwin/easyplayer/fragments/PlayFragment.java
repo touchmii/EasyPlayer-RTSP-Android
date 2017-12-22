@@ -3,7 +3,6 @@ package org.easydarwin.easyplayer.fragments;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -17,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
@@ -29,11 +29,8 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -69,6 +66,12 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     protected static final String TAG = "PlayFragment";
 
+    public static final int ASPACT_RATIO_INSIDE =  1;
+    public static final int ASPACT_RATIO_CROPE_MATRIX =  2;
+    public static final int ASPACT_RATIO_CENTER_CROPE =  3;
+    public static final int FILL_WINDOW =  4;
+
+
     // TODO: Rename and change types of parameters
     protected String mUrl;
     protected int mType;
@@ -103,6 +106,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         }
     };
     private boolean mFullscreenMode;
+    private int mRatioType = ASPACT_RATIO_CROPE_MATRIX;
 
     public void setSelected(boolean selected) {
         mSurfaceView.animate().scaleX(selected ? 0.9f : 1.0f);
@@ -161,13 +165,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_play, container, false);
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PlayActivity activity = (PlayActivity) getActivity();
-                activity.onPlayFragmentClicked(PlayFragment.this);
-            }
-        });
+//        view.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                PlayActivity activity = (PlayActivity) getActivity();
+//                activity.onPlayFragmentClicked(PlayFragment.this);
+//            }
+//        });
 
         cover = (ImageView) view.findViewById(R.id.surface_cover);
 //        Glide.with(this).load(PlaylistActivity.url2localPosterFile(getActivity(), mUrl)).diskCacheStrategy(DiskCacheStrategy.NONE).placeholder(R.drawable.placeholder).into(new ImageViewTarget<GlideDrawable>(cover) {
@@ -297,17 +301,17 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     private void onVideoSizeChange() {
         Log.i(TAG, String.format("RESULT_VIDEO_SIZE RECEIVED :%d*%d", mWidth, mHeight));
-
-        if (mAttacher != null) {
+        if (mWidth == 0 || mHeight == 0) return;
+        if (mAttacher != null){
             mAttacher.cleanup();
+            mAttacher = null;
         }
-        if (!mFullscreenMode) {
-
+        if (mRatioType == ASPACT_RATIO_CROPE_MATRIX) {
             ViewGroup parent = (ViewGroup) getView().getParent();
             parent.addOnLayoutChangeListener(listener);
             fixPlayerRatio(getView(), parent.getWidth(), parent.getHeight());
-
-
+            mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
             mAttacher = new PhotoViewAttacher(mSurfaceView, mWidth, mHeight);
             mAttacher.setScaleType(ImageView.ScaleType.CENTER_CROP);
             mAttacher.setOnMatrixChangeListener(PlayFragment.this);
@@ -316,7 +320,44 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         }else {
             mSurfaceView.setTransform(new Matrix());
             mAngleView.setVisibility(View.GONE);
+//            int viewWidth = mSurfaceView.getWidth();
+//            int viewHeight = mSurfaceView.getHeight();
+            float ratioView = getView().getWidth() * 1.0f/getView().getHeight();
+            float ratio = mWidth * 1.0f/mHeight;
+
+            switch (mRatioType){
+                case ASPACT_RATIO_INSIDE: {
+
+                    if (ratioView - ratio < 0){    // 屏幕比视频的宽高比更小.表示视频是过于宽屏了.
+                        // 宽为基准.
+                        mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                        mSurfaceView.getLayoutParams().height = (int) (getView().getWidth() / ratio + 0.5f);
+                    }else{                          // 视频是竖屏了.
+                        mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        mSurfaceView.getLayoutParams().width = (int) (getView().getHeight() * ratio + 0.5f);
+                    }
+                }
+                    break;
+                case ASPACT_RATIO_CENTER_CROPE: {
+                    // 以更短的为基准
+                    if (ratioView - ratio < 0){    // 屏幕比视频的宽高比更小.表示视频是过于宽屏了.
+                        // 宽为基准.
+                        mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        mSurfaceView.getLayoutParams().width = (int) (getView().getHeight() * ratio+ 0.5f);
+                    }else{                          // 视频是竖屏了.
+                        mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                        mSurfaceView.getLayoutParams().height = (int) (getView().getWidth() / ratio+ 0.5f);
+                    }
+                }
+                    break;
+                case FILL_WINDOW:{
+                    mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                    mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                }
+                    break;
+            }
         }
+        mSurfaceView.requestLayout();
     }
 
     private void onVideoDisplayed() {
@@ -338,6 +379,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         });
         cover.setVisibility(View.GONE);
         sendResult(RESULT_REND_VIDEO_DISPLAYED, null);
+
     }
 
     @Override
@@ -407,6 +449,9 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+//        if (isHidden()){
+//            return;
+//        }
         startRending(surface);
     }
 
@@ -431,6 +476,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             mStreamRender = null;
         }
     }
+
+
 
     /**
      * Called when the fragment is no longer in use.  This is called
@@ -628,5 +675,29 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     public boolean isAudioEnable() {
         return mStreamRender != null && mStreamRender.isAudioEnable();
+    }
+
+    public void setScaleType(@IntRange(from = ASPACT_RATIO_INSIDE, to = FILL_WINDOW) int type){
+        mRatioType = type;
+        if (mWidth != 0 && mHeight != 0){
+            onVideoSizeChange();
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (true) return;
+        if (hidden){
+            // stop
+//            stopRending();
+            if (mStreamRender != null) {
+                mStreamRender.pause();
+            }
+        }else{
+            if (mStreamRender != null) {
+                mStreamRender.resume();
+            }
+        }
     }
 }

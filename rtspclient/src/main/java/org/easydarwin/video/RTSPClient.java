@@ -1,6 +1,9 @@
 package org.easydarwin.video;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.renderscript.RSInvalidStateException;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -10,6 +13,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by John on 2016/3/12.
@@ -17,6 +22,26 @@ import java.util.Arrays;
 public class RTSPClient implements Closeable {
 
     private static int sKey;
+    private volatile int paused = 0;
+    private static final Handler h = new Handler(Looper.getMainLooper());
+    private static Set<Integer> _channelPause = new HashSet<>();
+    private final Runnable closeTask = new Runnable() {
+        @Override
+        public void run() {
+            if (paused > 0) {
+                Log.i(TAG, "realPause! close stream");
+                closeStream();
+                paused = 2;
+            }
+        }
+    };
+    private int _channel;
+    private String _url;
+    private int _type;
+    private int _mediaType;
+    private String _user;
+    private String _pwd;
+
 
     public static final class FrameInfo {
         public int codec;			/* 音视频格式 */
@@ -153,11 +178,20 @@ public class RTSPClient implements Closeable {
     }
 
     public int openStream(int channel, String url, int type, int mediaType, String user, String pwd) {
-        return openStream(mCtx, channel, url, type, mediaType, user, pwd);
+        _channel = channel;
+        _url = url;
+        _type = type;
+        _mediaType = mediaType;
+        _user = user;
+        _pwd = pwd;
+        return openStream();
     }
 
     public void closeStream() {
-        closeStream(mCtx);
+        h.removeCallbacks(closeTask);
+        if (mCtx != 0){
+            closeStream(mCtx);
+        }
     }
 
     private static native int getErrorCode(long context);
@@ -166,11 +200,15 @@ public class RTSPClient implements Closeable {
 
     private native int deInit(long context);
 
-    private int openStream(long context, int channel, String url, int trans_type, int mediaType, String user, String pwd) {
-        if (null == url) {
+    private int openStream() {
+        if (null == _url) {
             throw new NullPointerException();
         }
-        return openStream(context, channel, url, trans_type, mediaType, user, pwd, 1000, 0);
+        if (mCtx == 0){
+            throw new IllegalStateException("context is 0!");
+        }
+
+        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0);
     }
 
     private native int openStream(long context, int channel, String url, int type, int mediaType, String user, String pwd, int reconn, int outRtpPacket);
@@ -182,37 +220,36 @@ public class RTSPClient implements Closeable {
     private native void closeStream(long context);
 
     private static void onRTSPSourceCallBack(int _channelId, int _channelPtr, int _frameType, byte[] pBuf, byte[] frameBuffer) {
+        final RTSPSourceCallBack callBack;
+        synchronized (sCallbacks) {
+            callBack = sCallbacks.get(_channelId);
+        }
         if (_frameType == 0) {
-            synchronized (sCallbacks) {
-                final RTSPSourceCallBack callBack = sCallbacks.get(_channelId);
-                if (callBack != null) {
-                    callBack.onRTSPSourceCallBack(_channelId, _channelPtr, _frameType, null);
-                }
+            if (callBack != null) {
+                callBack.onRTSPSourceCallBack(_channelId, _channelPtr, _frameType, null);
             }
             return;
         }
 
         if (_frameType == EASY_SDK_MEDIA_INFO_FLAG) {
-            synchronized (sCallbacks) {
-                final RTSPSourceCallBack callBack = sCallbacks.get(_channelId);
-                if (callBack != null) {
-                    MediaInfo mi = new MediaInfo();
+            if (callBack != null) {
+                MediaInfo mi = new MediaInfo();
 
-                    ByteBuffer buffer = ByteBuffer.wrap(pBuf);
-                    buffer.order(ByteOrder.LITTLE_ENDIAN);
-                    mi.videoCodec = buffer.getInt();
-                    mi.fps = buffer.getInt();
-                    mi.audioCodec = buffer.getInt();
-                    mi.sample = buffer.getInt();
-                    mi.channel = buffer.getInt();
-                    mi.bitPerSample = buffer.getInt();
-                    mi.spsLen = buffer.getInt();
-                    mi.ppsLen = buffer.getInt();
-                    mi.sps = new byte[128];
-                    mi.pps = new byte[36];
+                ByteBuffer buffer = ByteBuffer.wrap(pBuf);
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
+                mi.videoCodec = buffer.getInt();
+                mi.fps = buffer.getInt();
+                mi.audioCodec = buffer.getInt();
+                mi.sample = buffer.getInt();
+                mi.channel = buffer.getInt();
+                mi.bitPerSample = buffer.getInt();
+                mi.spsLen = buffer.getInt();
+                mi.ppsLen = buffer.getInt();
+                mi.sps = new byte[128];
+                mi.pps = new byte[36];
 
-                    buffer.get(mi.sps);
-                    buffer.get(mi.pps);
+                buffer.get(mi.sps);
+                buffer.get(mi.pps);
 //                    int videoCodec;int fps;
 //                    int audioCodec;int sample;int channel;int bitPerSample;
 //                    int spsLen;
@@ -220,8 +257,7 @@ public class RTSPClient implements Closeable {
 //                    byte[]sps;
 //                    byte[]pps;
 
-                    callBack.onMediaInfoCallBack(_channelId, mi);
-                }
+                callBack.onMediaInfoCallBack(_channelId, mi);
             }
             return;
         }
@@ -253,11 +289,15 @@ public class RTSPClient implements Closeable {
 //        Log.d(TAG, String.format("%s:%d,%d,%d, %d", EASY_SDK_VIDEO_FRAME_FLAG == _frameType ? "视频" : "音频", fi.stamp, fi.timestamp_sec, fi.timestamp_usec, differ));
         fi.buffer = pBuf;
 
-        synchronized (sCallbacks) {
-            final RTSPSourceCallBack callBack = sCallbacks.get(_channelId);
-            if (callBack != null) {
-                callBack.onRTSPSourceCallBack(_channelId, _channelPtr, _frameType, fi);
+        boolean paused = false;
+        synchronized (_channelPause) {
+            paused = _channelPause.contains(_channelId);
+        }
+        if (callBack != null) {
+            if (paused){
+                Log.i(TAG,"channel_" + _channelId + " is paused!");
             }
+            callBack.onRTSPSourceCallBack(_channelId, _channelPtr, _frameType, fi);
         }
     }
 
@@ -273,8 +313,39 @@ public class RTSPClient implements Closeable {
         }
     }
 
+
+    public void pause() {
+        if (Looper.myLooper() != Looper.getMainLooper()){
+            throw new IllegalThreadStateException("please call pause in Main thread!");
+        }
+        synchronized (_channelPause) {
+            _channelPause.add(_channel);
+        }
+        paused = 1;
+        Log.i(TAG,"pause:=" + 1);
+        h.postDelayed(closeTask, 10000);
+    }
+
+    public void resume() {
+        if (Looper.myLooper() != Looper.getMainLooper()){
+            throw new IllegalThreadStateException("call resume in Main thread!");
+        }
+        synchronized (_channelPause) {
+            _channelPause.remove(_channel);
+        }
+        h.removeCallbacks(closeTask);
+        if (paused == 2){
+            Log.i(TAG,"resume:=" + 0);
+            openStream();
+        }
+        Log.i(TAG,"resume:=" + 0);
+        paused = 0;
+    }
+
     @Override
     public void close() throws IOException {
+        h.removeCallbacks(closeTask);
+        _channelPause.remove(_channel);
         if (mCtx == 0) throw new IOException("not opened or already closed");
         deInit(mCtx);
         mCtx = 0;

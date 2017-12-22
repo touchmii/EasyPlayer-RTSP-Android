@@ -357,6 +357,20 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         }
     }
 
+    public void pause(){
+        mQueue.clear();
+        if (mClient != null) {
+            mClient.pause();
+        }
+        mQueue.clear();
+    }
+
+    public void resume(){
+        if (mClient != null) {
+            mClient.resume();
+        }
+    }
+
     /**
      * 终止播放
      */
@@ -877,7 +891,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                     e.printStackTrace();
                 } finally {
                     if (mCodec != null) {
-                        mCodec.stop();
+//                        mCodec.stop();
                         mCodec.release();
                     }
                     if (mDecoder != null) {
@@ -906,7 +920,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         if (mMediaInfo == null || mWidth == 0 || mHeight == 0 || mCSD0 == null || mCSD1 == null)
             return;
         mRecordingPath = path;
-        mObject = new EasyAACMuxer(path, Integer.MAX_VALUE);
+        mObject = new EasyAACMuxer(path, mMediaInfo.sample != 0, Integer.MAX_VALUE);
         MediaFormat format = new MediaFormat();
         format.setInteger(MediaFormat.KEY_WIDTH, mWidth);
         format.setInteger(MediaFormat.KEY_HEIGHT, mHeight);
@@ -936,8 +950,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                 format.setByteBuffer("csd-" + j, ByteBuffer.wrap(bytes.get(j)));
             }
             mObject.addTrack(format, false);
-        }else{
-            mObject.addTrack(null, false);
         }
         ResultReceiver rr = mRR;
         if (rr != null) {
@@ -1028,6 +1040,20 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onRTSPSourceCallBack(int _channelId, int _channelPtr, int _frameType, RTSPClient.FrameInfo frameInfo) {
+        long begin = SystemClock.elapsedRealtime();
+        try{
+            onRTSPSourceCallBack1(_channelId, _channelPtr, _frameType, frameInfo);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }finally {
+            Log.d(TAG, String.format("onRTSPSourceCallBack %d", SystemClock.elapsedRealtime() - begin));
+        }
+    }
+
+
+    public void onRTSPSourceCallBack1(int _channelId, int _channelPtr, int _frameType, RTSPClient.FrameInfo frameInfo) {
+
+
         Thread.currentThread().setName("PRODUCER_THREAD");
         if (frameInfo != null) {
             mReceivedDataLength += frameInfo.length;
