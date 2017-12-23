@@ -41,17 +41,26 @@ Android：Android Studio编译；
 
 ![EasyPlayer Android](https://raw.githubusercontent.com/EasyDarwin/EasyPlayer_Android/master/EasyPlayer/screenshot/single_video.jpg?raw=true)
 
-## 商业授权 ##
-EasyPlayer是一款非常稳定的流媒体播放器，各平台版本需要经过授权才能商业使用，商业授权方案可以邮件发送至[support@easydarwin.org](mailto:support@easydarwin.org "EasyDarwin support mail")或者通过电话Tel：**13718530929** 进行更深入的技术与合作咨询；
+
+## 技术支持 ##
+
+- 邮件：[support@easydarwin.org](mailto:support@easydarwin.org) 
+
+- Tel：13718530929
+
+- QQ交流群：[544917793](http://jq.qq.com/?_wv=1027&k=2IDkJId "EasyPlayer")
+
+> EasyPlayer是一款非常稳定的RTSP播放器组件，各平台版本需要经过授权才能商业使用，商业授权方案可以通过以上渠道进行更深入的技术与合作咨询；
+
 
 ## 获取更多信息 ##
 
-邮件：[support@easydarwin.org](mailto:support@easydarwin.org) 
+**EasyDarwin**开源流媒体服务器：[www.EasyDarwin.org](http://www.easydarwin.org)
 
-WEB：[www.EasyDarwin.org](http://www.easydarwin.org)
+**EasyDSS**商用流媒体解决方案：[www.EasyDSS.com](http://www.easydss.com)
 
-QQ交流群：[544917793](http://jq.qq.com/?_wv=1027&k=2IDkJId "EasyPlayer")
+**EasyNVR**无插件直播方案：[www.EasyNVR.com](http://www.easynvr.com)
 
-Copyright &copy; EasyDarwin.org 2012-2017
+Copyright &copy; EasyDarwin Team 2012-2017
 
 ![EasyDarwin](http://www.easydarwin.org/skin/easydarwin/images/wx_qrcode.jpg)
