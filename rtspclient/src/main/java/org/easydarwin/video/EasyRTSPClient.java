@@ -118,6 +118,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
     short mWidth = 0;
     private ByteBuffer mCSD0;
     private ByteBuffer mCSD1;
+    private final I420DataCallback i420callback;
 
 //    private RtmpClient mRTMPClient = new RtmpClient();
 
@@ -283,12 +284,23 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
      * @param surface 显示视频用的surface
      */
     public EasyRTSPClient(Context context, String key, Surface surface, ResultReceiver receiver) {
+        this(context, key, surface,receiver, null);
+    }
+
+    /**
+     * 创建SDK对象
+     *
+     * @param context 上下文对象
+     * @param key     SDK key
+     * @param surface 显示视频用的surface
+     */
+    public EasyRTSPClient(Context context, String key, Surface surface, ResultReceiver receiver, I420DataCallback callback) {
         mSurface = surface;
         mContext = context;
         mKey = key;
         mRR = receiver;
+        i420callback = callback;
     }
-
 
     /**
      * 启动播放
@@ -355,6 +367,10 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                 }
             }
         }
+    }
+
+    public static interface I420DataCallback{
+        public void onI420Data(ByteBuffer buffer);
     }
 
     public void pause(){
@@ -524,7 +540,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
 
         mAudioThread.start();
     }
-
 
     private static void save2path(byte[] buffer, int offset, int length, String path, boolean append) {
         FileOutputStream fos = null;
@@ -732,7 +747,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                         if (mCodec == null && mDecoder == null) {
                             frameInfo = mQueue.takeVideoFrame();
                             try {
-                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false)){
+                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false) || i420callback != null){
                                     throw new IllegalStateException("user set sw codec");
                                 }
                                 final String mime = frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264 ? "video/avc" : "video/hevc";
@@ -787,7 +802,9 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                             if (frameInfo != null) {
                                 long decodeBegin = System.currentTimeMillis();
                                 int[] size = new int[2];
-                                mDecoder.decodeFrame(frameInfo, size);
+//                                mDecoder.decodeFrame(frameInfo, size);
+                                ByteBuffer buf = mDecoder.decodeFrameYUV(frameInfo, size);
+                                if (i420callback != null && buf != null) i420callback.onI420Data(buf);
                                 long decodeSpend = System.currentTimeMillis() - decodeBegin;
 
                                 boolean firstFrame = previewStampUs == 0l;
@@ -990,7 +1007,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         }
     }
 
-
     private void pumpPCMSample(byte[] pcm, int length, long stampUS) {
         EasyAACMuxer muxer = mObject;
         if (muxer == null) return;
@@ -1000,7 +1016,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
             e.printStackTrace();
         }
     }
-
 
     private void pumpVideoSample(RTSPClient.FrameInfo frameInfo) {
         EasyMuxer muxer = mObject;
@@ -1036,7 +1051,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         }
     }
 
-
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onRTSPSourceCallBack(int _channelId, int _channelPtr, int _frameType, RTSPClient.FrameInfo frameInfo) {
@@ -1050,10 +1064,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         }
     }
 
-
     public void onRTSPSourceCallBack1(int _channelId, int _channelPtr, int _frameType, RTSPClient.FrameInfo frameInfo) {
-
-
         Thread.currentThread().setName("PRODUCER_THREAD");
         if (frameInfo != null) {
             mReceivedDataLength += frameInfo.length;

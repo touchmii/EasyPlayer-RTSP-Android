@@ -1,36 +1,22 @@
 package org.easydarwin.easyplayer;
 
-import android.databinding.DataBindingUtil;
-import android.media.SoundPool;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import org.easydarwin.easyplayer.fragments.PlayFragment;
+import org.easydarwin.easyplayer.fragments.YUVExportFragment;
 import org.easydarwin.video.RTSPClient;
 import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivityTwoWndPlayBinding;
 
-public class TwoWndPlayActivity extends AppCompatActivity {
+public class YUVExportActivity extends AppCompatActivity {
 
-    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 0x111;
-    private GestureDetectorCompat mDetector;
-    private SoundPool mSoundPool;
-    private int mTalkPictureSound;
-    private int mActionStartSound;
-    private int mActionStopSound;
     private PlayFragment mRenderFragment;
-    private float mAudioVolumn;
-    private float mMaxVolume;
-    private ActivityTwoWndPlayBinding mBinding;
-    private long mLastReceivedLength;
     private int i = 0;
 
     @Override
@@ -43,37 +29,23 @@ public class TwoWndPlayActivity extends AppCompatActivity {
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        setContentView(R.layout.yuv_export_activity);
         if (savedInstanceState == null) {
             boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-            PlayFragment fragment = PlayFragment.newInstance("rtsp://cloud.easydarwin.org:554/uvc_956.sdp", useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null);
-            getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"second").hide(fragment).commit();
-            fragment.setScaleType(++i);
-
-            fragment = PlayFragment.newInstance(url, useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null);
-            fragment.setScaleType(++i);
+            YUVExportFragment fragment = YUVExportFragment.newInstance(url, useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null);
+            fragment.setScaleType(PlayFragment.ASPACT_RATIO_CROPE_MATRIX);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"first").commit();
             mRenderFragment = fragment;
         } else {
             mRenderFragment = (PlayFragment) getSupportFragmentManager().findFragmentByTag("first");
         }
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_two_wnd_play);
 
-    }
-
-    public void onResume() {
-        super.onResume();
-    }
-
-    public void onPause() {
-        super.onPause();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.add_url) {
-
-        } else if (item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
         }
@@ -81,20 +53,6 @@ public class TwoWndPlayActivity extends AppCompatActivity {
     }
 
 
-    public void onSwitchPlayer(View view) {
-        PlayFragment f = (PlayFragment) getSupportFragmentManager().findFragmentByTag("first");
-        PlayFragment s = (PlayFragment) getSupportFragmentManager().findFragmentByTag("second");
-
-        if (!s.isHidden()){
-            getSupportFragmentManager().beginTransaction().show(f).commit();
-            getSupportFragmentManager().beginTransaction().hide(s).commit();
-            mRenderFragment = f;
-        }else{
-            getSupportFragmentManager().beginTransaction().show(s).commit();
-            getSupportFragmentManager().beginTransaction().hide(f).commit();
-            mRenderFragment = s;
-        }
-    }
 
     public void onToggleAspectRatio(View view) {
         PlayFragment f =mRenderFragment;

@@ -1,5 +1,7 @@
 package org.easydarwin.video;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by John on 2017/1/5.
  */
@@ -21,6 +23,7 @@ public class VideoCodec {
     protected long mHandle;
 
     private native int decode(long handle, byte[] in, int offset, int length,int []size);
+    private native ByteBuffer decodeYUV(long handle, byte[] in, int offset, int length, int []size);
 
     public int decoder_create(Object surface, int codec) {
         mHandle = create(surface, codec);
@@ -34,6 +37,12 @@ public class VideoCodec {
         int result = decode(mHandle, in, offset, length, size);
         return result;
     }
+
+    public ByteBuffer decoder_decodeYUV(byte[] in, int offset, int length, int[]size) {
+        ByteBuffer  buffer = decodeYUV(mHandle, in, offset, length, size);
+        return buffer;
+    }
+
 
     public void decoder_close() {
         if (mHandle == 0) {
@@ -66,6 +75,10 @@ public class VideoCodec {
             int nRet = 0;
             nRet = decoder_decode( aFrame.buffer, aFrame.offset, aFrame.length, size);
             return nRet;
+        }
+
+        protected ByteBuffer decodeFrameYUV(RTSPClient.FrameInfo aFrame, int []size) {
+            return decoder_decodeYUV( aFrame.buffer, aFrame.offset, aFrame.length, size);
         }
     }
 }

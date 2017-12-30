@@ -66,10 +66,27 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     protected static final String TAG = "PlayFragment";
 
+    /**
+     * 等比例,最大化区域显示,不裁剪
+     */
     public static final int ASPACT_RATIO_INSIDE =  1;
+    /**
+     * 等比例,裁剪,裁剪区域可以通过拖拽展示\隐藏
+     */
     public static final int ASPACT_RATIO_CROPE_MATRIX =  2;
+    /**
+     * 等比例,最大区域显示,裁剪
+     */
     public static final int ASPACT_RATIO_CENTER_CROPE =  3;
+    /**
+     * 拉伸显示,铺满全屏
+     */
     public static final int FILL_WINDOW =  4;
+
+
+    /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
+     */
+    public static final String KEY = "79393674363536526D343041484339617064446A70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
 
 
     // TODO: Rename and change types of parameters
@@ -422,9 +439,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     protected void startRending(SurfaceTexture surface) {
-        /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
-         */
-        mStreamRender = new EasyRTSPClient(getContext(), "79393674363536526D343041484339617064446A70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35", new Surface(surface), mResultReceiver);
+        mStreamRender = new EasyRTSPClient(getContext(), KEY, new Surface(surface), mResultReceiver);
 
         boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
 
@@ -442,7 +457,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     }
 
-    private void sendResult(int resultCode, Bundle resultData) {
+    protected void sendResult(int resultCode, Bundle resultData) {
         if (mRR != null)
         mRR.send(resultCode, resultData);
     }
@@ -495,7 +510,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     @Override
-    public void onMatrixChanged(RectF rect) {
+    public void onMatrixChanged(Matrix matrix, RectF rect) {
         float maxMovement = (rect.width() - mSurfaceView.getWidth());
         float middle = mSurfaceView.getWidth() * 0.5f + mSurfaceView.getLeft();
         float currentMiddle = rect.width() * 0.5f + rect.left;
@@ -687,7 +702,6 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (true) return;
         if (hidden){
             // stop
 //            stopRending();
