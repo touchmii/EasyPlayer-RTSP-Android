@@ -28,6 +28,8 @@ public class OverlayCanvasView extends View {
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Paint mBitmapPaint;
+    private OnTouchListener listener;
+    private boolean enableDrawing = true;
 
     public OverlayCanvasView(Context context) {
         super(context);
@@ -60,11 +62,43 @@ public class OverlayCanvasView extends View {
         mPath = new Path();
 
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
-        setOnTouchListener(new OnTouchListener() {
+        listener = new OnTouchListener() {
+
+            RectF dstRect = new RectF();
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                float x = event.getX();
-                float y = event.getY();
+                float x1 = event.getX();
+                float y1 = event.getY();
+
+                float x = x1;
+                float y = y1;
+
+                float cx0 = getWidth() * 0.5f;
+                float cy0 = getHeight() * 0.5f;
+
+                dstRect.set(0,0, getWidth(), getHeight());
+                mDrawMatrix.mapRect(dstRect);
+                float cx1 = dstRect.width() * 0.5f;
+                float cy1 = dstRect.height() * 0.5f;
+
+                x1 -= cx1;
+                y1 -= cy1;
+
+//                y -= cy;
+//                x -= cx;
+
+                Matrix m = new Matrix();
+                mDrawMatrix.invert(m);
+
+                float[] src = {x1, y1};
+                m.mapVectors(src);
+                x = src[0];
+                y = src[1];
+                x += cx0;
+                y += cy0;
+
+//                x - cx,y-cy;  在当前点.
+
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -83,11 +117,13 @@ public class OverlayCanvasView extends View {
                 }
                 return true;
             }
-        });
+        };
+        setOnTouchListener(listener);
     }
 
     public void setTransMatrix(Matrix matrix){
         mDrawMatrix = matrix;
+        invalidate();
     }
 
     @Override
@@ -119,8 +155,8 @@ public class OverlayCanvasView extends View {
 
         }
 
-        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
         canvas.drawPath(mPath, mPaint);
+        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
 
 
         canvas.restoreToCount(saveCount);
@@ -163,5 +199,19 @@ public class OverlayCanvasView extends View {
         // kill this so we don't double draw
         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
         mPath.reset();
+    }
+
+    public void toggleDrawable() {
+        enableDrawing = !enableDrawing;
+        setOnTouchListener(enableDrawing?listener:null);
+        if (enableDrawing){
+            clean();
+        }
+    }
+
+    public void clean(){
+        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
+        mCanvas.drawColor(Color.TRANSPARENT);
+        invalidate();
     }
 }

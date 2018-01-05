@@ -6,7 +6,6 @@ import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -15,27 +14,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.signature.StringSignature;
-
-import org.easydarwin.easyplayer.PlaylistActivity;
 import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.views.OverlayCanvasView;
-import org.easydarwin.video.EasyRTSPClient;
-import org.easydarwin.video.RTSPClient;
+import org.easydarwin.video.Client;
+import org.easydarwin.video.EasyPlayerClient;
 import org.esaydarwin.rtsp.player.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * Created by apple on 2017/12/30.
  */
 
-public class YUVExportFragment extends PlayFragment implements EasyRTSPClient.I420DataCallback{
+public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.I420DataCallback{
 
     OverlayCanvasView canvas;
     public static YUVExportFragment newInstance(String url, int type, ResultReceiver rr) {
@@ -60,7 +55,7 @@ public class YUVExportFragment extends PlayFragment implements EasyRTSPClient.I4
 
     @Override
     protected void startRending(SurfaceTexture surface) {
-        mStreamRender = new EasyRTSPClient(getContext(), KEY, new Surface(surface), mResultReceiver, this);
+        mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver, this);
 
         boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
 
@@ -68,7 +63,7 @@ public class YUVExportFragment extends PlayFragment implements EasyRTSPClient.I4
         f.mkdirs();
 
         try {
-            mStreamRender.start(mUrl, mType, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
+            mStreamRender.start(mUrl, mType, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -80,6 +75,21 @@ public class YUVExportFragment extends PlayFragment implements EasyRTSPClient.I4
     @Override
     public void onI420Data(ByteBuffer buffer) {
         Log.i(TAG, "I420 data length :" + buffer.capacity());
+
+
+    }
+
+    private void writeToFile(String path, ByteBuffer buffer){
+        try {
+            FileOutputStream fos = new FileOutputStream(path, true);
+            byte[] in = new byte[buffer.capacity()];
+            buffer.clear();
+            buffer.get(in);
+            fos.write(in);
+            fos.close();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -88,5 +98,9 @@ public class YUVExportFragment extends PlayFragment implements EasyRTSPClient.I4
         if (canvas != null) {
             canvas.setTransMatrix(matrix);
         }
+    }
+
+    public void toggleDraw() {
+        canvas.toggleDrawable();
     }
 }

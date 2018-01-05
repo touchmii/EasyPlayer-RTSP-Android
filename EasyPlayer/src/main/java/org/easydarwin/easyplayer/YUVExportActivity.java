@@ -11,12 +11,12 @@ import android.widget.Toast;
 
 import org.easydarwin.easyplayer.fragments.PlayFragment;
 import org.easydarwin.easyplayer.fragments.YUVExportFragment;
-import org.easydarwin.video.RTSPClient;
+import org.easydarwin.video.Client;
 import org.esaydarwin.rtsp.player.R;
 
 public class YUVExportActivity extends AppCompatActivity {
 
-    private PlayFragment mRenderFragment;
+    private YUVExportFragment mRenderFragment;
     private int i = 0;
 
     @Override
@@ -32,12 +32,12 @@ public class YUVExportActivity extends AppCompatActivity {
         setContentView(R.layout.yuv_export_activity);
         if (savedInstanceState == null) {
             boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-            YUVExportFragment fragment = YUVExportFragment.newInstance(url, useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null);
+            YUVExportFragment fragment = YUVExportFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null);
             fragment.setScaleType(PlayFragment.ASPACT_RATIO_CROPE_MATRIX);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"first").commit();
             mRenderFragment = fragment;
         } else {
-            mRenderFragment = (PlayFragment) getSupportFragmentManager().findFragmentByTag("first");
+            mRenderFragment = (YUVExportFragment) getSupportFragmentManager().findFragmentByTag("first");
         }
 
 
@@ -55,7 +55,7 @@ public class YUVExportActivity extends AppCompatActivity {
 
 
     public void onToggleAspectRatio(View view) {
-        PlayFragment f =mRenderFragment;
+        YUVExportFragment f =mRenderFragment;
         if (f == null) return;
         f.setScaleType(++i);
         switch (i){
@@ -81,5 +81,11 @@ public class YUVExportActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    public void onToggleDraw(View view) {
+        YUVExportFragment f =mRenderFragment;
+        if (f == null) return;
+        f.toggleDraw();
     }
 }
