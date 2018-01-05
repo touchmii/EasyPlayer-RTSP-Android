@@ -72,6 +72,11 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         sendResult(RESULT_REND_STARTED, null);
     }
 
+    /**
+     * 这个buffer对象在回调结束之后会变无效.所以不可以把它保存下来用
+     .如果需要保存,必须要创建新buffer,并拷贝数据.
+     * @param buffer
+     */
     @Override
     public void onI420Data(ByteBuffer buffer) {
         Log.i(TAG, "I420 data length :" + buffer.capacity());
