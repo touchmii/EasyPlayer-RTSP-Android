@@ -9,12 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import org.easydarwin.easyplayer.fragments.PlayFragment;
-import org.easydarwin.video.RTSPClient;
+import org.easydarwin.video.Client;
 import org.esaydarwin.rtsp.player.R;
 import org.esaydarwin.rtsp.player.databinding.ActivityTwoWndPlayBinding;
 
@@ -45,11 +44,11 @@ public class TwoWndPlayActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-            PlayFragment fragment = PlayFragment.newInstance("rtsp://cloud.easydarwin.org:554/c_420.sdp", useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null);
+            PlayFragment fragment = PlayFragment.newInstance("rtsp://cloud.easydarwin.org:554/uvc_956.sdp", useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"second").hide(fragment).commit();
             fragment.setScaleType(++i);
 
-            fragment = PlayFragment.newInstance(url, useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null);
+            fragment = PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null);
             fragment.setScaleType(++i);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"first").commit();
             mRenderFragment = fragment;

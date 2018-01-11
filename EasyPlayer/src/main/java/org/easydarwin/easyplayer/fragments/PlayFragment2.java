@@ -20,7 +20,7 @@ import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.PlayActivity;
 import org.easydarwin.easyplayer.PlaylistActivity;
-import org.easydarwin.video.EasyRTSPClient;
+import org.easydarwin.video.EasyPlayerClient;
 import org.esaydarwin.rtsp.player.R;
 
 import java.util.UUID;
@@ -97,7 +97,7 @@ public class PlayFragment2 extends PlayFragment implements SurfaceHolder.Callbac
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 super.onReceiveResult(resultCode, resultData);
-                if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
+                if (resultCode == EasyPlayerClient.RESULT_VIDEO_DISPLAYED) {
 //                    Toast.makeText(PlayActivity.this, "视频正在播放了", Toast.LENGTH_SHORT).show();
                     view.findViewById(android.R.id.progress).setVisibility(View.GONE);
 //                    surfaceView.post(new Runnable() {
@@ -113,16 +113,16 @@ public class PlayFragment2 extends PlayFragment implements SurfaceHolder.Callbac
 //                        }
 //                    });
                     cover.setVisibility(View.GONE);
-                } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
-                    mWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
-                    mHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
+                } else if (resultCode == EasyPlayerClient.RESULT_VIDEO_SIZE) {
+                    mWidth = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_WIDTH);
+                    mHeight = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_HEIGHT);
                     if (!isLandscape()) {
 
                         ViewGroup parent = (ViewGroup) view.getParent();
                         parent.addOnLayoutChangeListener(listener);
                         fixPlayerRatio(view, parent.getWidth(), parent.getHeight());
                     }
-                } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
+                } else if (resultCode == EasyPlayerClient.RESULT_TIMEOUT) {
                     Toast.makeText(getActivity(), "试播时间到", Toast.LENGTH_SHORT).show();
                 }
             }

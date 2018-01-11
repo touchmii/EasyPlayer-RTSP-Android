@@ -22,20 +22,11 @@ android {
     dataBinding {
         enabled = true
     }
-
-    flavorDimensions 'prod'
-    productFlavors {
-        basic {
-            applicationId "org.easydarwin.easyplayer"
-            dimension 'prod'
-        }
-    }
     android.applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName =  "EasyPlayer-" + variant.versionCode + "-" + variant.versionName + ".apk"
+            outputFileName =  "EasyPlayerRTMP-" + variant.versionCode + "-" + variant.versionName + ".apk"
         }
     }
-
 }
 repositories {
     flatDir {
@@ -46,7 +37,7 @@ repositories {
 }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':rtspclient')
+    compile project(':library')
     compile(name: 'update-release', ext: 'aar')
 //    compile(name: 'rtspclient-release', ext: 'aar')
     compile(name: 'texturegesture-release', ext: 'aar')

@@ -21,7 +21,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
-import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -41,7 +40,7 @@ import android.widget.Toast;
 
 import org.easydarwin.easyplayer.fragments.ImageFragment;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
-import org.easydarwin.video.RTSPClient;
+import org.easydarwin.video.Client;
 import org.esaydarwin.rtsp.player.R;
 import org.esaydarwin.rtsp.player.databinding.ActivityMainBinding;
 import org.json.JSONArray;
@@ -316,7 +315,7 @@ public class PlayActivity extends AppCompatActivity {
         }
         mBinding.playerContainer.addView(item);
         boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-        getSupportFragmentManager().beginTransaction().add(item.getId(), PlayFragment.newInstance(url, useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, null)).commit();
+        getSupportFragmentManager().beginTransaction().add(item.getId(), PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null)).commit();
     }
 
     /**
@@ -429,7 +428,7 @@ public class PlayActivity extends AppCompatActivity {
                 };
             }
             boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-            PlayFragment fragment = PlayFragment.newInstance(url, useUDP ? RTSPClient.TRANSTYPE_UDP : RTSPClient.TRANSTYPE_TCP, rr);
+            PlayFragment fragment = PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, rr);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment).commit();
             mRenderFragment = fragment;
         } else {

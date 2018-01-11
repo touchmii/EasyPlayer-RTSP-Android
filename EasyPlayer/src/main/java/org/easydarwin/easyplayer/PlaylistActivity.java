@@ -185,17 +185,17 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                         if (TextUtils.isEmpty(mRTSPUrl)) {
                             return;
                         }
-                        if (!isPro()){
-                            if (mRTSPUrl.toLowerCase().indexOf("rtsp://")!=0){
-                                Toast.makeText(PlaylistActivity.this,"不是合法的RTSP地址，请重新添加.",Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                        }else{
-//                            if (mRTSPUrl.toLowerCase().indexOf("rtsp://")!=0 && mRTSPUrl.toLowerCase().indexOf("rtmp://")!=0 && mRTSPUrl.toLowerCase().indexOf("http://")!=0 && mRTSPUrl.toLowerCase().indexOf("https://")!=0&& mRTSPUrl.toLowerCase().indexOf("hls://")!=0){
-//                                Toast.makeText(PlaylistActivity.this,"不是合法的地址，请重新添加.",Toast.LENGTH_SHORT).show();
+//                        if (!isPro()){
+//                            if (mRTSPUrl.toLowerCase().indexOf("rtsp://")!=0){
+//                                Toast.makeText(PlaylistActivity.this,"不是合法的RTSP地址，请重新添加.",Toast.LENGTH_SHORT).show();
 //                                return;
 //                            }
-                        }
+//                        }else{
+////                            if (mRTSPUrl.toLowerCase().indexOf("rtsp://")!=0 && mRTSPUrl.toLowerCase().indexOf("rtmp://")!=0 && mRTSPUrl.toLowerCase().indexOf("http://")!=0 && mRTSPUrl.toLowerCase().indexOf("https://")!=0&& mRTSPUrl.toLowerCase().indexOf("hls://")!=0){
+////                                Toast.makeText(PlaylistActivity.this,"不是合法的地址，请重新添加.",Toast.LENGTH_SHORT).show();
+////                                return;
+////                            }
+//                        }
                         ContentValues cv = new ContentValues();
                         cv.put(VideoSource.URL, mRTSPUrl);
                         TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv);
@@ -466,6 +466,12 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 //                i.putExtra("play_url", playUrl);
 //                mPos = pos;
 //                ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+
+
+//                Intent i = new Intent(PlaylistActivity.this, YUVExportActivity.class);
+//                i.putExtra("play_url", playUrl);
+//                mPos = pos;
+//                startActivity(i);
             }
         }
     }

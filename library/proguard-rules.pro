@@ -21,10 +21,6 @@
 -keepclassmembers class org.easydarwin.video.EasyPlayerClient {
    public *;
 }
-
--keepclassmembers class org.easydarwin.video.Client {
-    private void onRTSPSourceCallBack(int, int, int, byte[], byte[]);
-}
 -keepclassmembers class org.easydarwin.video.Client$FrameInfo{
     *;
 }

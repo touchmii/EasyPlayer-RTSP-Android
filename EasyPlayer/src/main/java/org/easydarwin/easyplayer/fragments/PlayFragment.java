@@ -40,8 +40,8 @@ import org.easydarwin.easyplayer.PlayActivity;
 import org.easydarwin.easyplayer.PlaylistActivity;
 import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.views.AngleView;
-import org.easydarwin.video.EasyRTSPClient;
-import org.easydarwin.video.RTSPClient;
+import org.easydarwin.video.EasyPlayerClient;
+import org.easydarwin.video.Client;
 import org.esaydarwin.rtsp.player.R;
 
 import java.io.File;
@@ -66,23 +66,41 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     protected static final String TAG = "PlayFragment";
 
+    /**
+     * 等比例,最大化区域显示,不裁剪
+     */
     public static final int ASPACT_RATIO_INSIDE =  1;
+    /**
+     * 等比例,裁剪,裁剪区域可以通过拖拽展示\隐藏
+     */
     public static final int ASPACT_RATIO_CROPE_MATRIX =  2;
+    /**
+     * 等比例,最大区域显示,裁剪
+     */
     public static final int ASPACT_RATIO_CENTER_CROPE =  3;
+    /**
+     * 拉伸显示,铺满全屏
+     */
     public static final int FILL_WINDOW =  4;
+
+
+    /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
+     */
+    public static final String KEY = "79393674363536526D343041484339617064446A70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
+//    public static final String KEY = "59617A414C5A36526D3432416855566170627035792B4676636D63755A57467A65575268636E64706269356C59584E3563477868655756794C6E4A3062584170567778576F50394C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
 
 
     // TODO: Rename and change types of parameters
     protected String mUrl;
     protected int mType;
 
-    protected EasyRTSPClient mStreamRender;
+    protected EasyPlayerClient mStreamRender;
     protected ResultReceiver mResultReceiver;
     protected int mWidth;
     protected int mHeight;
     protected View.OnLayoutChangeListener listener;
     private PhotoViewAttacher mAttacher;
-    private TextureView mSurfaceView;
+    protected TextureView mSurfaceView;
     private AngleView mAngleView;
     private MediaScannerConnection mScanner;
     private ImageView mRenderCover;
@@ -195,6 +213,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         super.onViewCreated(view, savedInstanceState);
 
         mSurfaceView = (TextureView) view.findViewById(R.id.surface_view);
+
+
+
+
         mSurfaceView.setOpaque(false);
         mSurfaceView.setSurfaceTextureListener(this);
         mAngleView = (AngleView) getView().findViewById(R.id.render_angle_view);
@@ -206,22 +228,22 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                 super.onReceiveResult(resultCode, resultData);
                 Activity activity = getActivity();
                 if (activity == null)return;
-                if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
+                if (resultCode == EasyPlayerClient.RESULT_VIDEO_DISPLAYED) {
 
                     onVideoDisplayed();
-                } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
-                    mWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
-                    mHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
+                } else if (resultCode == EasyPlayerClient.RESULT_VIDEO_SIZE) {
+                    mWidth = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_WIDTH);
+                    mHeight = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_HEIGHT);
 
 
                     onVideoSizeChange();
-                } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
+                } else if (resultCode == EasyPlayerClient.RESULT_TIMEOUT) {
                     new AlertDialog.Builder(getActivity()).setMessage("试播时间到").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO) {
+                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_AUDIO) {
                     new AlertDialog.Builder(getActivity()).setMessage("音频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO) {
+                } else if (resultCode == EasyPlayerClient.RESULT_UNSUPPORTED_VIDEO) {
                     new AlertDialog.Builder(getActivity()).setMessage("视频格式不支持").setTitle("SORRY").setPositiveButton(android.R.string.ok, null).show();
-                }else if (resultCode == EasyRTSPClient.RESULT_EVENT){
+                }else if (resultCode == EasyPlayerClient.RESULT_EVENT){
 
                     int errorcode = resultData.getInt("errorcode");
 //                    if (errorcode != 0){
@@ -230,10 +252,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                     if (activity instanceof PlayActivity) {
                         ((PlayActivity)activity).onEvent(PlayFragment.this, errorcode, resultData.getString("event-msg"));
                     }
-                }else if (resultCode == EasyRTSPClient.RESULT_RECORD_BEGIN){
+                }else if (resultCode == EasyPlayerClient.RESULT_RECORD_BEGIN){
                     if (activity instanceof PlayActivity)
                         ((PlayActivity)activity).onRecordState(1);
-                }else if (resultCode == EasyRTSPClient.RESULT_RECORD_END){
+                }else if (resultCode == EasyPlayerClient.RESULT_RECORD_END){
                     if (activity instanceof PlayActivity)
                         ((PlayActivity)activity).onRecordState(-1);
                 }
@@ -422,9 +444,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     protected void startRending(SurfaceTexture surface) {
-        /* 本Key为3个月临时授权License，如需商业使用或者更改applicationId，请邮件至support@easydarwin.org申请此产品的授权。
-         */
-        mStreamRender = new EasyRTSPClient(getContext(), "79393674363536526D343041484339617064446A70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C34456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35", new Surface(surface), mResultReceiver);
+        mStreamRender = new EasyPlayerClient(getContext(), KEY, new Surface(surface), mResultReceiver);
 
         boolean autoRecord = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("auto_record", false);
 
@@ -432,7 +452,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         f.mkdirs();
 
         try {
-            mStreamRender.start(mUrl, mType, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
+            mStreamRender.start(mUrl, mType, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -442,7 +462,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     }
 
-    private void sendResult(int resultCode, Bundle resultData) {
+    protected void sendResult(int resultCode, Bundle resultData) {
         if (mRR != null)
         mRR.send(resultCode, resultData);
     }
@@ -495,7 +515,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     @Override
-    public void onMatrixChanged(RectF rect) {
+    public void onMatrixChanged(Matrix matrix, RectF rect) {
         float maxMovement = (rect.width() - mSurfaceView.getWidth());
         float middle = mSurfaceView.getWidth() * 0.5f + mSurfaceView.getLeft();
         float currentMiddle = rect.width() * 0.5f + rect.left;
@@ -687,7 +707,6 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (true) return;
         if (hidden){
             // stop
 //            stopRending();

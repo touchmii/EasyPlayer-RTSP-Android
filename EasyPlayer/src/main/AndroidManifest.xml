@@ -38,6 +38,9 @@
             android:name="org.easydarwin.easyplayer.TwoWndPlayActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity
+            android:name="org.easydarwin.easyplayer.YUVExportActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
             android:name="org.easydarwin.easyplayer.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity
