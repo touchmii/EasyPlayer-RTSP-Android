@@ -124,7 +124,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         }
     };
     private boolean mFullscreenMode;
-    private int mRatioType = ASPACT_RATIO_CROPE_MATRIX;
+    private int mRatioType = ASPACT_RATIO_INSIDE;
 
     public void setSelected(boolean selected) {
         mSurfaceView.animate().scaleX(selected ? 0.9f : 1.0f);
@@ -267,18 +267,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 Log.d(TAG, String.format("onLayoutChange left:%d,top:%d,right:%d,bottom:%d->oldLeft:%d,oldTop:%d,oldRight:%d,oldBottom:%d", left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom));
                 if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
-                    if (!isLandscape()) {
-                        fixPlayerRatio(view, right - left, bottom - top);
-                    } else {
-                        PlayActivity activity = (PlayActivity) getActivity();
-                        if (!activity.multiWindows()) {
-                            view.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
-                            view.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-                            view.requestLayout();
-                        } else {
-                            fixPlayerRatio(view, right - left, bottom - top);
-                        }
-                    }
+
+                    onVideoSizeChange();
                 }
             }
         };
@@ -291,34 +281,11 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
 
     public void enterFullscreen() {
-        mFullscreenMode = true;
-        if (getView() == null){
-            return;
-        }
-        if (mAttacher != null) {
-            mAttacher.cleanup();
-        } mSurfaceView.setTransform(new Matrix());
-        mAngleView.setVisibility(View.GONE);
+        setScaleType(FILL_WINDOW);
     }
 
     public void quiteFullscreen() {
-        mFullscreenMode = false;
-        if (getView() == null){
-            return;
-        }
-        if (mAttacher != null) {
-            mAttacher.cleanup();
-        }
-        ViewGroup parent = (ViewGroup) getView().getParent();
-        parent.addOnLayoutChangeListener(listener);
-        fixPlayerRatio(getView(), parent.getWidth(), parent.getHeight());
-
-
-        mAttacher = new PhotoViewAttacher(mSurfaceView, mWidth, mHeight);
-        mAttacher.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        mAttacher.setOnMatrixChangeListener(PlayFragment.this);
-        mAttacher.update();
-        mAngleView.setVisibility(View.VISIBLE);
+        setScaleType(ASPACT_RATIO_CROPE_MATRIX);
     }
 
     private void onVideoSizeChange() {
