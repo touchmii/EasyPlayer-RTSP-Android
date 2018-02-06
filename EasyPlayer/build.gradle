@@ -24,7 +24,7 @@ android {
     }
     android.applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName =  "EasyPlayerRTMP-" + variant.versionCode + "-" + variant.versionName + ".apk"
+            outputFileName =  "EasyPlayerRTSP-" + variant.versionCode + "-" + variant.versionName + ".apk"
         }
     }
 }
