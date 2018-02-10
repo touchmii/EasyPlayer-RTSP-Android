@@ -70,19 +70,19 @@ public class OverlayCanvasView extends View {
                 float x1 = event.getX();
                 float y1 = event.getY();
 
-                float x = x1;
-                float y = y1;
-
-                float cx0 = getWidth() * 0.5f;
-                float cy0 = getHeight() * 0.5f;
-
-                dstRect.set(0,0, getWidth(), getHeight());
-                mDrawMatrix.mapRect(dstRect);
-                float cx1 = dstRect.width() * 0.5f;
-                float cy1 = dstRect.height() * 0.5f;
-
-                x1 -= cx1;
-                y1 -= cy1;
+//                float x = x1;
+//                float y = y1;
+//
+//                float cx0 = getWidth() * 0.5f;
+//                float cy0 = getHeight() * 0.5f;
+//
+//                dstRect.set(0,0, getWidth(), getHeight());
+//                mDrawMatrix.mapRect(dstRect);
+//                float cx1 = dstRect.width() * 0.5f;
+//                float cy1 = dstRect.height() * 0.5f;
+//
+//                x1 -= cx1;
+//                y1 -= cy1;
 
 //                y -= cy;
 //                x -= cx;
@@ -91,11 +91,13 @@ public class OverlayCanvasView extends View {
                 mDrawMatrix.invert(m);
 
                 float[] src = {x1, y1};
-                m.mapVectors(src);
-                x = src[0];
-                y = src[1];
-                x += cx0;
-                y += cy0;
+                m.mapPoints(src);
+                float x = src[0];
+                float y = src[1];
+//                x = src[0];
+//                y = src[1];
+//                x += cx0;
+//                y += cy0;
 
 //                x - cx,y-cy;  在当前点.
 
@@ -161,6 +163,7 @@ public class OverlayCanvasView extends View {
 
         canvas.restoreToCount(saveCount);
     }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -170,8 +173,8 @@ public class OverlayCanvasView extends View {
 
     }
 
-
     private float mX, mY;
+
     private static final float TOUCH_TOLERANCE = 4;
 
     private void touch_start(float x, float y) {

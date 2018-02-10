@@ -2,6 +2,7 @@ package org.easydarwin.easyplayer.fragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,12 +20,15 @@ import android.preference.PreferenceManager;
 import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -108,6 +112,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     private ImageView mTakePictureThumb;
     private ResultReceiver mRR;
     protected ImageView cover;
+
+    public interface OnDoubleTapListener{
+        void onDoubleTab(PlayFragment f);
+    }
     /**
      * 抓拍后隐藏thumb的task
      */
@@ -125,6 +133,11 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     };
     private boolean mFullscreenMode;
     private int mRatioType = ASPACT_RATIO_INSIDE;
+    private OnDoubleTapListener doubleTapListener;
+
+    public void setOnDoubleTapListener(OnDoubleTapListener listener){
+        this.doubleTapListener = listener;
+    }
 
     public void setSelected(boolean selected) {
         mSurfaceView.animate().scaleX(selected ? 0.9f : 1.0f);
@@ -133,6 +146,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     public long getReceivedStreamLength() {
+
         if (mStreamRender != null) {
             return mStreamRender.receivedDataLength();
         }
@@ -156,6 +170,17 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         public float getInterpolation(float paramFloat) {
             return super.getInterpolation(1.0f - paramFloat);
         }
+    }
+
+    public static PlayFragment newInstance(Context context, String url, ResultReceiver rr) {
+        PlayFragment fragment = new PlayFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, url);
+        boolean useUDP = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.key_udp_mode), false);
+        args.putInt(ARG_PARAM2, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP);
+        args.putParcelable(ARG_PARAM3, rr);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     public static PlayFragment newInstance(String url, int type, ResultReceiver rr) {
@@ -275,7 +300,26 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         ViewGroup parent = (ViewGroup) view.getParent();
         parent.addOnLayoutChangeListener(listener);
 
-        if (mFullscreenMode) enterFullscreen();else quiteFullscreen();
+        GestureDetector.SimpleOnGestureListener l = new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (doubleTapListener != null) doubleTapListener.onDoubleTab(PlayFragment.this);
+                return true;
+            }
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+        };
+
+        final GestureDetector gd = new GestureDetector(getContext(), l);
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gd.onTouchEvent(event);
+            }
+        });
     }
 
 

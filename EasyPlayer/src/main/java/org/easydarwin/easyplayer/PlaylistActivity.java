@@ -64,6 +64,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
     private ContentPlaylistBinding mBinding;
     private Cursor mCursor;
     private UpdateMgr update;
+    public static final String EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY = "extra-boolean-select-item-to-play";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +114,9 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         });
 
         if (savedInstanceState == null) {
-            startActivity(new Intent(this, SplashActivity.class));
+            if (!getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)) {
+                startActivity(new Intent(this, SplashActivity.class));
+            }
         }
 
 
@@ -429,6 +432,11 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    public void onMultiplay(View view) {
+        Intent intent = new Intent(this, MultiplayActivity.class);
+        startActivity(intent);
+    }
+
     class PlayListViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView mTextView;
@@ -456,11 +464,17 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
             mCursor.moveToPosition(pos);
             String playUrl = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
             if (!TextUtils.isEmpty(playUrl)) {
-                Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
-                i.putExtra("play_url", playUrl);
-                mPos = pos;
-                ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
-
+                if (getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)){
+                    Intent data = new Intent();
+                    data.putExtra("url", playUrl);
+                    setResult(RESULT_OK, data);
+                    finish();
+                }else {
+                    Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
+                    i.putExtra("play_url", playUrl);
+                    mPos = pos;
+                    ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
+                }
 
 //                Intent i = new Intent(PlaylistActivity.this, TwoWndPlayActivity.class);
 //                i.putExtra("play_url", playUrl);
