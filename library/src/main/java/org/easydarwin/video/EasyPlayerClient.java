@@ -824,11 +824,10 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     if (sleepTime > 0) {
                                         sleepTime %= 100000;
                                         long cache = mNewestStample - frameInfo.stamp;
-                                        sleepTime = fixSleepTime(sleepTime, cache, -100000);
+                                        sleepTime = fixSleepTime(sleepTime, cache, 0);
                                         if (sleepTime > 0) {
                                             Thread.sleep(sleepTime / 1000);
                                         }
-                                        Log.d(TAG,"cache:" + cache);
                                     }
                                 }
                                 previewStampUs = current;
@@ -878,8 +877,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                             {
                                                 long cache = mNewestStample - previewStampUs;
                                                 newSleepUs = fixSleepTime(sleepUs, cache, 0);
-                                                // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
-                                                Log.d(TAG,"cache:" + cache);
                                             }
                                         }
                                         previewStampUs = info.presentationTimeUs;
@@ -928,7 +925,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         double dValue = ((double) (delayUs - totalTimestampDifferUs)) / 1000000d;
         double radio = Math.pow(30,dValue);
         final double r = sleepTimeUs * radio + 0.5f;
-//        Log.d(TAG,String.format("fixSleepTime %d,%d,%d->%d", sleepTimeUs, totalTimestampDifferUs, delayUs, (long) r));
+        Log.d(TAG,String.format("fixSleepTime %d,%d,%d->%d", sleepTimeUs, totalTimestampDifferUs, delayUs, (long) r));
         return (long) r;
     }
 
