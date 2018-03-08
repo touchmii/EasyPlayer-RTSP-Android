@@ -877,7 +877,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                             }
                                             {
                                                 long cache = mNewestStample - previewStampUs;
-                                                newSleepUs = fixSleepTime(sleepUs, cache, -100000);
+                                                newSleepUs = fixSleepTime(sleepUs, cache, 0);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
                                                 Log.d(TAG,"cache:" + cache);
                                             }
