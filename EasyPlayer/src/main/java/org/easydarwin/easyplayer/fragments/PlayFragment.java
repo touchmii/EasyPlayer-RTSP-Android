@@ -344,6 +344,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
             mSurfaceView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             mSurfaceView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
             mAttacher = new PhotoViewAttacher(mSurfaceView, mWidth, mHeight);
+            mAttacher.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+//                    ...
+                    return false;
+                }
+            });
             mAttacher.setScaleType(ImageView.ScaleType.CENTER_CROP);
             mAttacher.setOnMatrixChangeListener(PlayFragment.this);
             mAttacher.update();
