@@ -12,7 +12,6 @@ public class EasyMuxer2 {
         System.loadLibrary("proffmpeg");
         System.loadLibrary("VideoCodecer");
     }
-
     public static final int AVMEDIA_TYPE_VIDEO  = 0;
     public static final int AVMEDIA_TYPE_AUDIO  = 1;
     @Native
