@@ -826,7 +826,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     if (rr != null) rr.send(RESULT_VIDEO_DISPLAYED, null);
                                 }
 
-                                Log.d(TAG, String.format("timestamp=%d diff=%d",current, current - previewStampUs ));
+                                //Log.d(TAG, String.format("timestamp=%d diff=%d",current, current - previewStampUs ));
 
                                 if (previewStampUs != 0l) {
                                     long sleepTime = current - previewStampUs - decodeSpend * 1000;
@@ -837,7 +837,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     if (sleepTime > 0) {
                                         sleepTime %= 100000;
                                         long cache = mNewestStample - frameInfo.stamp;
-                                        sleepTime = fixSleepTime(sleepTime, cache, 150000);
+                                        sleepTime = fixSleepTime(sleepTime, cache, 50000);
                                         if (sleepTime > 0) {
                                             Thread.sleep(sleepTime / 1000);
                                         }
@@ -897,7 +897,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 
                                             {
                                                 long cache = mNewestStample - previewStampUs;
-                                                newSleepUs = fixSleepTime(sleepUs, cache, 150000);
+                                                newSleepUs = fixSleepTime(sleepUs, cache, 100000);
                                                 // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
                                             }
                                         }
@@ -910,7 +910,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                             if (newSleepUs < 0) {
                                                 newSleepUs = 0;
                                             }
-//                                            Log.i(TAG,String.format("sleep:%d", newSleepUs/1000));
+                                            Log.d(TAG,String.format("sleep:%d", newSleepUs/1000));
                                             Thread.sleep(newSleepUs / 1000);
                                             mCodec.releaseOutputBuffer(index, true);
                                         }
@@ -1152,6 +1152,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             mReceivedDataLength += frameInfo.length;
         }
         if (_frameType == Client.EASY_SDK_VIDEO_FRAME_FLAG) {
+            //Log.d(TAG,String.format("receive video frame"));
             if (frameInfo.codec != EASY_SDK_VIDEO_CODEC_H264 && frameInfo.codec != EASY_SDK_VIDEO_CODEC_H265) {
                 ResultReceiver rr = mRR;
                 if (!mNotSupportedVideoCB && rr != null) {
