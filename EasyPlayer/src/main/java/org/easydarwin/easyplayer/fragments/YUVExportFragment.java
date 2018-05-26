@@ -80,8 +80,8 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
     @Override
     public void onI420Data(ByteBuffer buffer) {
         Log.i(TAG, "I420 data length :" + buffer.capacity());
-
-
+        // save to local...
+//        writeToFile("/sdcard/tmp.yuv", buffer);
     }
 
     private void writeToFile(String path, ByteBuffer buffer){
