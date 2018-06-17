@@ -20,7 +20,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.support.v7.app.AlertDialog;
@@ -42,11 +41,11 @@ import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.PlayActivity;
 import org.easydarwin.easyplayer.PlaylistActivity;
+import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.views.AngleView;
-import org.easydarwin.video.EasyPlayerClient;
 import org.easydarwin.video.Client;
-import org.esaydarwin.rtsp.player.R;
+import org.easydarwin.video.EasyPlayerClient;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -252,7 +251,10 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                 Activity activity = getActivity();
                 if (activity == null)return;
                 if (resultCode == EasyPlayerClient.RESULT_VIDEO_DISPLAYED) {
-
+                    if (resultData != null) {
+                        int videoDecodeType = resultData.getInt(EasyPlayerClient.KEY_VIDEO_DECODE_TYPE, 0);
+                        Log.i(TAG, "视频解码方式:" + (videoDecodeType == 0 ? "软解码" : "硬解码"));
+                    }
                     onVideoDisplayed();
                 } else if (resultCode == EasyPlayerClient.RESULT_VIDEO_SIZE) {
                     mWidth = resultData.getInt(EasyPlayerClient.EXTRA_VIDEO_WIDTH);

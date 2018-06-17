@@ -1,12 +1,17 @@
 package org.easydarwin.video;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -19,6 +24,7 @@ import java.util.Set;
 public class Client implements Closeable {
 
     private static int sKey;
+    private static Context mContext;
     private volatile int paused = 0;
     private static final Handler h = new Handler(Looper.getMainLooper());
     private static Set<Integer> _channelPause = new HashSet<>();
@@ -148,6 +154,7 @@ public class Client implements Closeable {
             throw new NullPointerException();
         }
         mCtx = init(context, key);
+        mContext = context.getApplicationContext();
         if (mCtx == 0 || mCtx == -1) {
             throw new IllegalArgumentException("初始化失败，KEY不合法！");
         }
@@ -215,7 +222,49 @@ public class Client implements Closeable {
 
     private native void closeStream(long context);
 
+
+    private static void save2path(byte[] buffer, int offset, int length, String path, boolean append) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(path, append);
+            fos.write(buffer, offset, length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     private static void onSourceCallBack(int _channelId, int _channelPtr, int _frameType, byte[] pBuf, byte[] frameBuffer) {
+        if (BuildConfig.MEDIA_DEBUG) {
+
+            int permissionCheck = ContextCompat.checkSelfPermission(mContext,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                // frameType + size + buffer
+                if (_frameType != 0) {
+                    ByteBuffer bf = ByteBuffer.allocate(5);
+                    bf.put((byte) _frameType);
+                    if (_frameType == EASY_SDK_MEDIA_INFO_FLAG) {
+                        bf.putInt(pBuf.length);
+                        save2path(bf.array(), 0, 5, "/sdcard/media_degbu.data", true);
+                        save2path(pBuf, 0, pBuf.length, "/sdcard/media_degbu.data", true);
+                    } else {
+                        bf.putInt(frameBuffer.length);
+                        save2path(bf.array(), 0, 5, "/sdcard/media_degbu.data", true);
+                        save2path(frameBuffer, 0, frameBuffer.length, "/sdcard/media_degbu.data", true);
+                    }
+                }
+            }
+        }
         final SourceCallBack callBack;
         synchronized (sCallbacks) {
             callBack = sCallbacks.get(_channelId);

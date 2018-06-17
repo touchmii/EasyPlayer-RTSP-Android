@@ -1,6 +1,5 @@
 package org.easydarwin.easyplayer;
 
-import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,7 +13,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,17 +26,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.StringSignature;
 
 import org.easydarwin.easyplayer.data.VideoSource;
+import org.easydarwin.easyplayer.databinding.ContentPlaylistBinding;
+import org.easydarwin.easyplayer.databinding.VideoSourceItemBinding;
 import org.easydarwin.update.UpdateMgr;
-import org.esaydarwin.rtsp.player.BuildConfig;
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ContentPlaylistBinding;
-import org.esaydarwin.rtsp.player.databinding.VideoSourceItemBinding;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

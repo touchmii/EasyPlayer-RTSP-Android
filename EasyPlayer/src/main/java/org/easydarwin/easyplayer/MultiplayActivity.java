@@ -2,12 +2,12 @@ package org.easydarwin.easyplayer;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -19,7 +19,6 @@ import android.view.WindowManager;
 import android.widget.RadioGroup;
 
 import org.easydarwin.easyplayer.fragments.PlayFragment;
-import org.esaydarwin.rtsp.player.R;
 
 public class MultiplayActivity extends AppCompatActivity implements PlayFragment.OnDoubleTapListener {
 

@@ -1,21 +1,16 @@
 package org.easydarwin.easyplayer;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.URLSpan;
-import android.text.style.UnderlineSpan;
 
-import org.esaydarwin.rtsp.player.BuildConfig;
-import org.esaydarwin.rtsp.player.R;
-import org.esaydarwin.rtsp.player.databinding.ActivityAboutBinding;
+import org.easydarwin.easyplayer.databinding.ActivityAboutBinding;
 
 public class AboutActivity extends AppCompatActivity {
 

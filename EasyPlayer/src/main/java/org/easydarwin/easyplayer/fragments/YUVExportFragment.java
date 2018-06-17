@@ -14,11 +14,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.views.OverlayCanvasView;
 import org.easydarwin.video.Client;
 import org.easydarwin.video.EasyPlayerClient;
-import org.esaydarwin.rtsp.player.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
