@@ -27,6 +27,7 @@ import android.view.TextureView;
 
 import org.easydarwin.audio.AudioCodec;
 import org.easydarwin.audio.EasyAACMuxer;
+import org.easydarwin.sw.JNIUtil;
 import org.easydarwin.util.CodecSpecificDataUtil;
 import org.easydarwin.util.TextureLifecycler;
 
@@ -47,6 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar;
 import static org.easydarwin.util.CodecSpecificDataUtil.AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE;
 import static org.easydarwin.video.Client.TRANSTYPE_TCP;
 import static org.easydarwin.video.EasyMuxer2.VIDEO_TYPE_H264;
@@ -552,17 +554,21 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                         }
                     };
                     try {
-                        frameInfo = mQueue.takeAudioFrame();
-                        final Thread t = Thread.currentThread();
                         int requestCode = am.requestAudioFocus(l, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
                         if (requestCode != AUDIOFOCUS_REQUEST_GRANTED) {
                             return;
                         }
+                        do {
+                            frameInfo = mQueue.takeAudioFrame();
+                            if (mMediaInfo != null) break;
+                        } while (true);
+                        final Thread t = Thread.currentThread();
+
                         if (mAudioTrack == null) {
-                            int sampleRateInHz = (int) (frameInfo.sample_rate * 1.004);
-                            int channelConfig = frameInfo.channels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
+                            int sampleRateInHz = (int) (mMediaInfo.sample * 1.001);
+                            int channelConfig = mMediaInfo.channel == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
                             int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-                            int bfSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat) * 4;
+                            int bfSize = AudioTrack.getMinBufferSize(mMediaInfo.sample, channelConfig, audioFormat) * 8;
                             mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateInHz, channelConfig, audioFormat, bfSize, AudioTrack.MODE_STREAM);
                         }
                         mAudioTrack.play();
@@ -1026,7 +1032,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                                 }
                                                 if (i420callback != null && outputBuffer != null) {
                                                     if (mColorFormat != COLOR_FormatYUV420Flexible && mColorFormat != COLOR_FormatYUV420Planar && mColorFormat != 0) {
-//                                                        JNIUtil.yuvConvert();
+                                                        if (COLOR_FormatYUV420SemiPlanar == mColorFormat) {
+                                                            JNIUtil.yuvConvert2(outputBuffer, mWidth, mHeight, 4);
+                                                        }
                                                     }
                                                     i420callback.onI420Data(outputBuffer);
                                                     displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
