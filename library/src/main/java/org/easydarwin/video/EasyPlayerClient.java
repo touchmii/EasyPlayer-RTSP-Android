@@ -926,7 +926,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                             pumpVideoSample(frameInfo);
                             lastFrameStampUs = frameInfo.stamp;
                         }
-
                         do {
                             if (mDecoder != null) {
                                 if (frameInfo != null) {
@@ -990,7 +989,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                                 frameInfo = null;
                                             }
                                         }
-
                                         index = mCodec.dequeueOutputBuffer(info, 10); //
                                         switch (index) {
                                             case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -1073,7 +1071,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     ex.printStackTrace();
                                     Log.e(TAG, String.format("init codec error due to %s", ex.getMessage()));
                                     final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
-                                    decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
+                                    decoder.create(mSurface, initFrameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
                                     mDecoder = decoder;
                                     if (mCodec != null) {
                                         mCodec.release();
