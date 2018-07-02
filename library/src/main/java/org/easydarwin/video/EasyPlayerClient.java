@@ -853,10 +853,13 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 //                    long current = 0;
 
                     MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+
+                    Client.FrameInfo initFrameInfo = null;
                     while (mThread != null) {
                         Client.FrameInfo frameInfo;
                         if (mCodec == null && mDecoder == null) {
                             frameInfo = mQueue.takeVideoFrame();
+                            initFrameInfo = frameInfo;
                             try {
                                 if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false)) {
                                     throw new IllegalStateException("user set sw codec");
