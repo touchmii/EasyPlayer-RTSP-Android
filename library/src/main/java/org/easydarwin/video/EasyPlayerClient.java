@@ -47,8 +47,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar;
 import static org.easydarwin.util.CodecSpecificDataUtil.AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE;
 import static org.easydarwin.video.Client.TRANSTYPE_TCP;
 import static org.easydarwin.video.EasyMuxer2.VIDEO_TYPE_H264;
@@ -881,11 +884,10 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                 }
                                 MediaCodecInfo ci = selectCodec(mime);
                                 MediaCodec codec = MediaCodec.createByCodecName(ci.getName());
-                                MediaCodecInfo.CodecCapabilities capabilities = ci.getCapabilitiesForType(mime);
-                                if (capabilities.colorFormats != null && capabilities.colorFormats.length > 0) {
-                                    mColorFormat = capabilities.colorFormats[0];
-                                }
+                                mColorFormat = CodecSpecificDataUtil.selectColorFormat(ci, mime);
+
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    MediaCodecInfo.CodecCapabilities capabilities = ci.getCapabilitiesForType(mime);
                                     boolean supported = capabilities.getVideoCapabilities().isSizeSupported(mWidth, mHeight);
                                     Log.i(TAG, "media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
                                 }
@@ -1032,10 +1034,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                                     outputBuffer = mCodec.getOutputBuffers()[index];
                                                 }
                                                 if (i420callback != null && outputBuffer != null) {
-                                                    if (mColorFormat != COLOR_FormatYUV420Flexible && mColorFormat != COLOR_FormatYUV420Planar && mColorFormat != 0) {
-                                                        if (COLOR_FormatYUV420SemiPlanar == mColorFormat) {
-                                                            JNIUtil.yuvConvert2(outputBuffer, mWidth, mHeight, 4);
-                                                        }
+                                                    if (mColorFormat == COLOR_FormatYUV420SemiPlanar || mColorFormat == COLOR_FormatYUV420PackedSemiPlanar
+                                                            || mColorFormat == COLOR_TI_FormatYUV420PackedSemiPlanar) {
+                                                        JNIUtil.yuvConvert2(outputBuffer, mWidth, mHeight, 4);
                                                     }
                                                     i420callback.onI420Data(outputBuffer);
                                                     displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
