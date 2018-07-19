@@ -883,15 +883,19 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                         throw new InvalidParameterException("csd-1 is invalid.");
                                 }
                                 MediaCodecInfo ci = selectCodec(mime);
-                                MediaCodec codec = MediaCodec.createByCodecName(ci.getName());
                                 mColorFormat = CodecSpecificDataUtil.selectColorFormat(ci, mime);
 
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                     MediaCodecInfo.CodecCapabilities capabilities = ci.getCapabilitiesForType(mime);
                                     boolean supported = capabilities.getVideoCapabilities().isSizeSupported(mWidth, mHeight);
                                     Log.i(TAG, "media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
+                                    if (!supported){
+                                        throw new IllegalStateException("media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
+                                    }
                                 }
                                 Log.i(TAG, String.format("config codec:%s", format));
+
+                                MediaCodec codec = MediaCodec.createByCodecName(ci.getName());
                                 codec.configure(format, i420callback != null ? null : mSurface, null, 0);
                                 codec.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                                 codec.start();
@@ -902,6 +906,10 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     displayer = decoder;
                                 }
                             } catch (Throwable e) {
+                                if (mCodec != null) mCodec.release();
+                                mCodec = null;
+                                if (displayer != null) displayer.close();
+                                displayer = null;
                                 Log.e(TAG, String.format("init codec error due to %s", e.getMessage()));
                                 e.printStackTrace();
                                 final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
@@ -1069,15 +1077,19 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     while (frameInfo != null || index < MediaCodec.INFO_TRY_AGAIN_LATER);
                                 } catch (IllegalStateException ex) {
                                     // mediacodec error...
+
                                     ex.printStackTrace();
+
                                     Log.e(TAG, String.format("init codec error due to %s", ex.getMessage()));
+
+                                    if (mCodec != null) mCodec.release();
+                                    mCodec = null;
+                                    if (displayer != null) displayer.close();
+                                    displayer = null;
+
                                     final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
                                     decoder.create(mSurface, initFrameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
                                     mDecoder = decoder;
-                                    if (mCodec != null) {
-                                        mCodec.release();
-                                        mCodec = null;
-                                    }
                                     continue;
                                 }
 
