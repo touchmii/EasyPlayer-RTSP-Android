@@ -64,7 +64,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="没有获取到视频列表,您可以点击右上角的'+'添加一个。"
+                    android:text="没有视频列表,您可以点击右上角的'+'添加一个。"
                     android:visibility="gone" />
             </FrameLayout>
 
