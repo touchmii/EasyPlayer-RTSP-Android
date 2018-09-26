@@ -1,11 +1,15 @@
 package org.easydarwin.easyplayer.fragments;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -42,14 +46,68 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         fragment.setArguments(args);
         return fragment;
     }
+    boolean recordPaused = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.fragment_play_overlay_canvas, container, false);
-        cover = (ImageView) view.findViewById(R.id.surface_cover);
+        cover = view.findViewById(R.id.surface_cover);
         canvas = view.findViewById(R.id.overlay_canvas);
+        view.findViewById(R.id.start_or_stop_record).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+
+                int permissionCheck = ContextCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            1);
+                    return;
+                }
+
+                if (mStreamRender == null) {
+                    Toast.makeText(getActivity(), "未开始播放,录像失败",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (mStreamRender.isRecording()){
+                    mStreamRender.stopRecord();
+                    Toast.makeText(getActivity(), "停止录像，路径：/sdcard/test.mp4",Toast.LENGTH_SHORT).show();
+                }else {
+                    mStreamRender.startRecord("/sdcard/test.mp4");
+
+                    Toast.makeText(getActivity(), "开始录像，路径：/sdcard/test.mp4",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        view.findViewById(R.id.pause_or_resume_record).setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                if (mStreamRender == null) {
+                    Toast.makeText(getActivity(), "未开始录像1",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!mStreamRender.isRecording()){
+                    Toast.makeText(getActivity(), "未开始录像2",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (recordPaused) mStreamRender.resumeRecord();
+                else mStreamRender.pauseRecord();
+                recordPaused = !recordPaused;
+
+                if (recordPaused){
+                    Toast.makeText(getActivity(), "录像暂停",Toast.LENGTH_SHORT).show();
+                }else{
+
+                    Toast.makeText(getActivity(), "录像恢复",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
         return view;
     }
 

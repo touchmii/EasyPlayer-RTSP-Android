@@ -19,6 +19,7 @@ import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -141,6 +142,12 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     private ByteBuffer mCSD1;
     private final I420DataCallback i420callback;
     private boolean mMuxerWaitingKeyVideo;
+    /**
+     * -1 表示暂停中，0表示正常录像中，1表示恢复中。
+     */
+    private int mRecordingStatus;
+    private long muxerPausedMillis = 0L;
+    private long mMuxerCuttingMillis = 0L;
 
 //    private RtmpClient mRTMPClient = new RtmpClient();
 
@@ -851,6 +858,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                     long previousStampUs = 0l;
                     long lastFrameStampUs = 0l;
                     long differ = 0;
+                    int realWidth = mWidth;
+                    int realHeight = mHeight;
+                    int sliceHeight = realHeight;
 //
 //                    long decodeBegin = 0;
 //                    long current = 0;
@@ -887,10 +897,18 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                     MediaCodecInfo.CodecCapabilities capabilities = ci.getCapabilitiesForType(mime);
-                                    boolean supported = capabilities.getVideoCapabilities().isSizeSupported(mWidth, mHeight);
+                                    MediaCodecInfo.VideoCapabilities videoCapabilities = capabilities.getVideoCapabilities();
+                                    boolean supported = videoCapabilities.isSizeSupported(mWidth, mHeight);
                                     Log.i(TAG, "media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
                                     if (!supported){
-                                        throw new IllegalStateException("media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
+                                        boolean b1 = videoCapabilities.getSupportedWidths().contains(mWidth + 0);
+                                        boolean b2 = videoCapabilities.getSupportedHeights().contains(mHeight + 0);
+                                        supported |= b1&&b2;
+                                        if (supported){
+                                            Log.w(TAG, ".......................................................................");
+                                        }else {
+                                            throw new IllegalStateException("media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
+                                        }
                                     }
                                 }
                                 Log.i(TAG, String.format("config codec:%s", format));
@@ -1007,6 +1025,23 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                             case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
                                                 MediaFormat mf = mCodec.getOutputFormat();
                                                 Log.i(TAG, "INFO_OUTPUT_FORMAT_CHANGED ：" + mf);
+                                                int width = mf.getInteger(MediaFormat.KEY_WIDTH);
+                                                if (mf.containsKey("crop-left") && mf.containsKey("crop-right")) {
+                                                    width = mf.getInteger("crop-right") + 1 - mf.getInteger("crop-left");
+                                                }
+                                                int height = mf.getInteger(MediaFormat.KEY_HEIGHT);
+                                                if (mf.containsKey("crop-top") && mf.containsKey("crop-bottom")) {
+                                                    height = mf.getInteger("crop-bottom") + 1 - mf.getInteger("crop-top");
+                                                }
+                                                realWidth = width;
+                                                realHeight = height;
+
+                                                if (mf.containsKey(MediaFormat.KEY_SLICE_HEIGHT) ) {
+                                                    sliceHeight = mf.getInteger(MediaFormat.KEY_SLICE_HEIGHT);
+                                                }
+                                                else{
+                                                    sliceHeight = realHeight;
+                                                }
                                                 break;
                                             case MediaCodec.INFO_TRY_AGAIN_LATER:
                                                 // 输出为空
@@ -1042,12 +1077,35 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                                     outputBuffer = mCodec.getOutputBuffers()[index];
                                                 }
                                                 if (i420callback != null && outputBuffer != null) {
+                                                    if (sliceHeight != realHeight){
+                                                        ByteBuffer tmp = ByteBuffer.allocateDirect(realWidth*realHeight*3/2);
+                                                        outputBuffer.clear();
+                                                        outputBuffer.limit(realWidth*realHeight);
+                                                        tmp.put(outputBuffer);
+
+                                                        outputBuffer.clear();
+                                                        outputBuffer.position(realWidth * sliceHeight);
+                                                        outputBuffer.limit((realWidth * sliceHeight + realWidth*realHeight /4));
+                                                        tmp.put(outputBuffer);
+
+                                                        outputBuffer.clear();
+                                                        outputBuffer.position(realWidth * sliceHeight + realWidth*realHeight/4);
+                                                        outputBuffer.limit((realWidth * sliceHeight + realWidth*realHeight/4 + realWidth*realHeight /4));
+                                                        tmp.put(outputBuffer);
+
+                                                        tmp.clear();
+                                                        outputBuffer = tmp;
+                                                    }
+
                                                     if (mColorFormat == COLOR_FormatYUV420SemiPlanar || mColorFormat == COLOR_FormatYUV420PackedSemiPlanar
                                                             || mColorFormat == COLOR_TI_FormatYUV420PackedSemiPlanar) {
-                                                        JNIUtil.yuvConvert2(outputBuffer, mWidth, mHeight, 4);
+                                                        JNIUtil.yuvConvert2(outputBuffer, realWidth, realHeight, 4);
                                                     }
+//                                                    else if (mColorFormat == COLOR_FormatYUV420Planar){
+////                                                        JNIUtil.yuvConvert2(tmp, realWidth, realHeight, 4);
+//                                                    }
                                                     i420callback.onI420Data(outputBuffer);
-                                                    displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
+                                                    displayer.decoder_decodeBuffer(outputBuffer, realWidth, realHeight);
                                                 }
                                                 //previewStampUs = info.presentationTimeUs;
                                                 if (false && Build.VERSION.SDK_INT >= 21) {
@@ -1176,8 +1234,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             return;
         mRecordingPath = path;
         EasyMuxer2 muxer2 = new EasyMuxer2();
-
-
+        mMuxerCuttingMillis = 0l;
+        mRecordingStatus = 0;
+        muxerPausedMillis = 0;
         ByteBuffer csd1 = this.mCSD1;
         if (csd1 == null) csd1 = ByteBuffer.allocate(0);
         byte[] extra = new byte[mCSD0.capacity() + csd1.capacity()];
@@ -1196,6 +1255,20 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         ResultReceiver rr = mRR;
         if (rr != null) {
             rr.send(RESULT_RECORD_BEGIN, null);
+        }
+    }
+
+    public synchronized void pauseRecord(){
+        if (mRecordingStatus !=-1) {
+            mRecordingStatus = -1;
+            muxerPausedMillis = SystemClock.elapsedRealtime();
+        }
+    }
+
+    public synchronized void resumeRecord(){
+        if (mRecordingStatus == -1){
+            mMuxerWaitingKeyVideo = true;
+            mRecordingStatus = 1;
         }
     }
 
@@ -1245,9 +1318,47 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
         EasyMuxer2 muxer2 = this.muxer2;
         if (muxer2 == null) return;
-        int r = muxer2.writeFrame(EasyMuxer2.AVMEDIA_TYPE_AUDIO, pcm, 0, length, stampUS / 1000);
+        if (mRecordingStatus < 0) return;
+        if (mMuxerWaitingKeyVideo) {
+            Log.i(TAG, "writeFrame ignore due to no key frame!");
+            return;
+        }
+        long timeStampMillis = stampUS/1000;
+        timeStampMillis -= mMuxerCuttingMillis;
+        timeStampMillis = Math.max(0, timeStampMillis);
+        int r = muxer2.writeFrame(EasyMuxer2.AVMEDIA_TYPE_AUDIO, pcm, 0, length, timeStampMillis);
         Log.i(TAG, "writeFrame audio ret:" + r);
     }
+
+
+    private synchronized void pumpVideoSample(Client.FrameInfo frameInfo) {
+        EasyMuxer2 muxer2 = this.muxer2;
+        if (muxer2 == null) return;
+        if (mRecordingStatus < 0) return;
+        if (mMuxerWaitingKeyVideo) {
+            if (frameInfo.type == 1) {
+                mMuxerWaitingKeyVideo = false;
+                if (mRecordingStatus == 1) {
+                    mMuxerCuttingMillis += SystemClock.elapsedRealtime() - muxerPausedMillis;
+                    mRecordingStatus = 0;
+                }
+            }
+        }
+        if (mMuxerWaitingKeyVideo) {
+            Log.i(TAG, "writeFrame ignore due to no key frame!");
+            return;
+        }
+        if (frameInfo.type == 1) {
+//            frameInfo.offset = 60;
+//            frameInfo.length -= 60;
+        }
+        long timeStampMillis = frameInfo.stamp / 1000;
+        timeStampMillis -= mMuxerCuttingMillis;
+        timeStampMillis = Math.max(0, timeStampMillis);
+        int r = muxer2.writeFrame(EasyMuxer2.AVMEDIA_TYPE_VIDEO, frameInfo.buffer, frameInfo.offset, frameInfo.length, timeStampMillis);
+        Log.i(TAG, "writeFrame video ret:" + r);
+    }
+
 
     private void pumpVideoSample1(Client.FrameInfo frameInfo) {
         EasyMuxer muxer = mObject;
@@ -1271,27 +1382,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
             ex.printStackTrace();
         }
     }
-
-    private synchronized void pumpVideoSample(Client.FrameInfo frameInfo) {
-        EasyMuxer2 muxer2 = this.muxer2;
-        if (muxer2 == null) return;
-        if (mMuxerWaitingKeyVideo) {
-            if (frameInfo.type == 1) {
-                mMuxerWaitingKeyVideo = false;
-            }
-        }
-        if (mMuxerWaitingKeyVideo) {
-            Log.i(TAG, "writeFrame ignore due to no key frame!");
-            return;
-        }
-        if (frameInfo.type == 1) {
-//            frameInfo.offset = 60;
-//            frameInfo.length -= 60;
-        }
-        int r = muxer2.writeFrame(EasyMuxer2.AVMEDIA_TYPE_VIDEO, frameInfo.buffer, frameInfo.offset, frameInfo.length, frameInfo.stamp / 1000);
-        Log.i(TAG, "writeFrame video ret:" + r);
-    }
-
     public synchronized void stopRecord1() {
         mRecordingPath = null;
         if (mObject == null) return;
@@ -1305,6 +1395,9 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 
     public synchronized void stopRecord() {
         mRecordingPath = null;
+        mMuxerCuttingMillis = 0l;
+        mRecordingStatus = 0;
+        muxerPausedMillis = 0;
         EasyMuxer2 muxer2 = this.muxer2;
         if (muxer2 == null) return;
         this.muxer2 = null;
