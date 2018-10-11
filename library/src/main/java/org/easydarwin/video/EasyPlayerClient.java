@@ -840,7 +840,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     }
 
     private void startCodec() {
-        final int delayUS = PreferenceManager.getDefaultSharedPreferences(mContext).getInt("delayUs", 0);
         mThread = new Thread("VIDEO_CONSUMER") {
 
             @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -861,6 +860,8 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                     int realWidth = mWidth;
                     int realHeight = mHeight;
                     int sliceHeight = realHeight;
+
+                    int frameWidth = 0;int frameHeight = 0;
 //
 //                    long decodeBegin = 0;
 //                    long current = 0;
@@ -868,10 +869,12 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                     MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
 
                     Client.FrameInfo initFrameInfo = null;
+                    Client.FrameInfo frameInfo = null;
                     while (mThread != null) {
-                        Client.FrameInfo frameInfo;
                         if (mCodec == null && mDecoder == null) {
-                            frameInfo = mQueue.takeVideoFrame();
+                            if (frameInfo == null) {
+                                frameInfo = mQueue.takeVideoFrame();
+                            }
                             initFrameInfo = frameInfo;
                             try {
                                 if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false)) {
@@ -951,6 +954,22 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                         }
                         if (frameInfo != null) {
                             Log.d(TAG, "video " + frameInfo.stamp + " take[" + (frameInfo.stamp - lastFrameStampUs) + "]");
+                            if (frameHeight != 0 && frameWidth != 0){
+                                if (frameInfo.width != 0 && frameInfo.height != 0){
+                                    if (frameInfo.width != frameWidth || frameInfo.height != frameHeight){
+                                        frameHeight = frameInfo.height;
+                                        frameWidth = frameInfo.width;
+                                        stopRecord();
+                                        if (mCodec != null){
+                                            mCodec.release();
+                                            mCodec = null;
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+                            frameHeight = frameInfo.height;
+                            frameWidth = frameInfo.width;
                             pumpVideoSample(frameInfo);
                             lastFrameStampUs = frameInfo.stamp;
                         }
@@ -1186,47 +1205,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         return (long) r;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public synchronized void startRecord1(String path) {
-        if (mMediaInfo == null || mWidth == 0 || mHeight == 0 || mCSD0 == null || mCSD1 == null)
-            return;
-        mRecordingPath = path;
-        mObject = new EasyAACMuxer(path, mMediaInfo.sample != 0, Integer.MAX_VALUE);
-        MediaFormat format = new MediaFormat();
-        format.setInteger(MediaFormat.KEY_WIDTH, mWidth);
-        format.setInteger(MediaFormat.KEY_HEIGHT, mHeight);
-        mCSD0.clear();
-        format.setByteBuffer("csd-0", mCSD0);
-        mCSD1.clear();
-        format.setByteBuffer("csd-1", mCSD1);
-        format.setString(MediaFormat.KEY_MIME, "video/avc");
-        format.setInteger(MediaFormat.KEY_FRAME_RATE, 0);
-//        format.setInteger(MediaFormat.KEY_BIT_RATE, mWidth*mHeight*0.7*2);
-        mObject.addTrack(format, true);
-
-        format = new MediaFormat();
-        int audioObjectType = 2;
-        int sampleRateIndex = getSampleIndex(mMediaInfo.sample);
-        if (sampleRateIndex > 0) {
-            int channelConfig = mMediaInfo.channel;
-            byte[] audioSpecificConfig = CodecSpecificDataUtil.buildAacAudioSpecificConfig(audioObjectType, sampleRateIndex, channelConfig);
-            Pair<Integer, Integer> audioParams = CodecSpecificDataUtil.parseAacAudioSpecificConfig(audioSpecificConfig);
-//                                format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0);
-            format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_AUDIO_AAC);
-            format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, audioParams.second);
-            format.setInteger(MediaFormat.KEY_SAMPLE_RATE, audioParams.first);
-
-            List<byte[]> bytes = Collections.singletonList(audioSpecificConfig);
-            for (int j = 0; j < bytes.size(); j++) {
-                format.setByteBuffer("csd-" + j, ByteBuffer.wrap(bytes.get(j)));
-            }
-            mObject.addTrack(format, false);
-        }
-        ResultReceiver rr = mRR;
-        if (rr != null) {
-            rr.send(RESULT_RECORD_BEGIN, null);
-        }
-    }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public synchronized void startRecord(String path) {
@@ -1305,15 +1283,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         }
     }
 
-    private void pumpPCMSample1(byte[] pcm, int length, long stampUS) {
-        EasyAACMuxer muxer = mObject;
-        if (muxer == null) return;
-        try {
-            muxer.pumpPCMStream(pcm, length, stampUS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
         EasyMuxer2 muxer2 = this.muxer2;
@@ -1359,39 +1328,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         Log.i(TAG, "writeFrame video ret:" + r);
     }
 
-
-    private void pumpVideoSample1(Client.FrameInfo frameInfo) {
-        EasyMuxer muxer = mObject;
-        if (muxer == null) return;
-        MediaCodec.BufferInfo bi = new MediaCodec.BufferInfo();
-        bi.offset = frameInfo.offset;
-        bi.size = frameInfo.length;
-        ByteBuffer buffer = ByteBuffer.wrap(frameInfo.buffer, bi.offset, bi.size);
-        bi.presentationTimeUs = frameInfo.stamp;
-        try {
-            if (frameInfo.audio) {
-                throw new IllegalArgumentException("frame should be video!");
-            }
-            if (frameInfo.type != 1) {
-                bi.flags = 0;
-            } else {
-                bi.flags = MediaCodec.BUFFER_FLAG_KEY_FRAME;
-            }
-            muxer.pumpStream(buffer, bi, true);
-        } catch (IllegalStateException ex) {
-            ex.printStackTrace();
-        }
-    }
-    public synchronized void stopRecord1() {
-        mRecordingPath = null;
-        if (mObject == null) return;
-        mObject.release();
-        mObject = null;
-        ResultReceiver rr = mRR;
-        if (rr != null) {
-            rr.send(RESULT_RECORD_END, null);
-        }
-    }
 
     public synchronized void stopRecord() {
         mRecordingPath = null;
@@ -1474,6 +1410,8 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                 bundle.putInt(EXTRA_VIDEO_HEIGHT, frameInfo.height);
                 mWidth = frameInfo.width;
                 mHeight = frameInfo.height;
+                Log.i(TAG, String.format("RESULT_VIDEO_SIZE:%d*%d", frameInfo.width, frameInfo.height));
+                if (rr != null) rr.send(RESULT_VIDEO_SIZE, bundle);
 
 
                 Log.i(TAG, String.format("width:%d,height:%d", mWidth, mHeight));
@@ -1509,8 +1447,6 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                         mCSD0 = ByteBuffer.wrap(spsPps);
                     }
                 }
-                Log.i(TAG, String.format("RESULT_VIDEO_SIZE:%d*%d", frameInfo.width, frameInfo.height));
-                if (rr != null) rr.send(RESULT_VIDEO_SIZE, bundle);
 
                 if (frameInfo.type != 1) {
                     Log.w(TAG, String.format("discard p frame."));
@@ -1521,6 +1457,21 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                     if (!TextUtils.isEmpty(mRecordingPath) && mObject == null) {
                         startRecord(mRecordingPath);
                     }
+                }
+            }else{
+                int width = frameInfo.width;
+                int height = frameInfo.height;
+                if (width != 0 && height != 0)
+                if (width != mWidth || height != mHeight){
+                    // resolution change...
+                    ResultReceiver rr = mRR;
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(EXTRA_VIDEO_WIDTH, frameInfo.width);
+                    bundle.putInt(EXTRA_VIDEO_HEIGHT, frameInfo.height);
+                    mWidth = frameInfo.width;
+                    mHeight = frameInfo.height;
+                    Log.i(TAG, String.format("RESULT_VIDEO_SIZE:%d*%d", frameInfo.width, frameInfo.height));
+                    if (rr != null) rr.send(RESULT_VIDEO_SIZE, bundle);
                 }
             }
 //            Log.d(TAG, String.format("queue size :%d", mQueue.size()));
