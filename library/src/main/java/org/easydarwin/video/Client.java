@@ -156,7 +156,7 @@ public class Client implements Closeable {
         mCtx = init(context, key);
         mContext = context.getApplicationContext();
         if (mCtx == 0 || mCtx == -1) {
-            throw new IllegalArgumentException("初始化失败，KEY不合法！");
+            Log.wtf(TAG, new IllegalArgumentException("初始化失败，KEY不合法！")) ;
         }
     }
 
