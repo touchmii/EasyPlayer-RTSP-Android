@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -13,6 +14,8 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
@@ -208,10 +211,29 @@ public class Client implements Closeable {
             throw new NullPointerException();
         }
         if (mCtx == 0){
-            throw new IllegalStateException("context is 0!");
+            throw new IllegalStateException("初始化失败，KEY不合法");
         }
-
-        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0, 0);
+        boolean options = false;
+        try {
+            URI url = new URI(_url);
+            String query = url.getQuery();
+            if (!TextUtils.isEmpty(query)){
+                String []slices = query.split("&");
+                for (String fragment : slices) {
+                    String []key_value = fragment.split("=");
+                    if (key_value.length == 2){
+                        if (key_value[0].equals("o")){
+                            if (key_value[1].equals("1")){
+                                options = true;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0, options ? 1:0);
     }
 
     private native int openStream(long context, int channel, String url, int type, int mediaType, String user, String pwd, int reconn, int outRtpPacket, int rtspOption);
