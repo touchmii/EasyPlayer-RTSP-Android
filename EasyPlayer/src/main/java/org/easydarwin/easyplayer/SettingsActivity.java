@@ -43,7 +43,6 @@ public class SettingsActivity extends AppCompatActivity {
 //        "114.55.107.180"
         mBinding.serverIp.setText(PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_ip), TheApp.DEFAULT_SERVER_IP));
         mBinding.serverPort.setText(PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.key_port), "10008"));
-        mBinding.transportMode.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false));
         mBinding.autoRecord.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("auto_record", false));
         mBinding.swCodec.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("use-sw-codec", false));
     }
@@ -57,7 +56,6 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putString(getString(R.string.key_ip), mBinding.serverIp.getText().toString());
         editor.putString(getString(R.string.key_port), mBinding.serverPort.getText().toString());
-        editor.putBoolean(getString(R.string.key_udp_mode), mBinding.transportMode.isChecked());
         editor.putBoolean("auto_record", mBinding.autoRecord.isChecked());
         editor.putBoolean("use-sw-codec",mBinding.swCodec.isChecked());
         editor.apply();

@@ -383,12 +383,12 @@ public class EasyPlayerClient implements Client.SourceCallBack {
      */
     public void play(final String url) {
         if (lifecycler.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.CREATED)) {
-            start(url, TRANSTYPE_TCP, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+            start(url, TRANSTYPE_TCP, 0,Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
         } else {
             lifecycler.getLifecycle().addObserver(new LifecycleObserver() {
                 @OnLifecycleEvent(value = Lifecycle.Event.ON_CREATE)
                 void create() {
-                    start(url, TRANSTYPE_TCP, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+                    start(url, TRANSTYPE_TCP, 0,Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG,  "", "", null);
                 }
             });
         }
@@ -399,13 +399,14 @@ public class EasyPlayerClient implements Client.SourceCallBack {
      *
      * @param url
      * @param type
+     * @param sendOption
      * @param mediaType
      * @param user
      * @param pwd
      * @return
      */
-    public int start(final String url, int type, int mediaType, String user, String pwd) {
-        return start(url, type, mediaType, user, pwd, null);
+    public int start(final String url, int type, int sendOption,int mediaType, String user, String pwd) {
+        return start(url, type, sendOption, mediaType, user, pwd, null);
     }
 
     /**
@@ -413,12 +414,13 @@ public class EasyPlayerClient implements Client.SourceCallBack {
      *
      * @param url
      * @param type
+     * @param sendOption
      * @param mediaType
      * @param user
      * @param pwd
      * @return
      */
-    public int start(final String url, int type, int mediaType, String user, String pwd, String recordPath) {
+    public int start(final String url, int type, int sendOption, int mediaType, String user, String pwd, String recordPath) {
         if (url == null) {
             throw new NullPointerException("url is null");
         }
@@ -437,7 +439,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         int channel = mClient.registerCallback(this);
         mRecordingPath = recordPath;
         Log.i(TAG, String.format("playing url:\n%s\n", url));
-        return mClient.openStream(channel, url, type, mediaType, user, pwd);
+        return mClient.openStream(channel, url, type, sendOption, mediaType, user, pwd);
     }
 
     public boolean isAudioEnable() {

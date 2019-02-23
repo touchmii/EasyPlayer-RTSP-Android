@@ -18,6 +18,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
@@ -138,11 +139,11 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         mBinding.toolbarAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final EditText edit = new EditText(PlaylistActivity.this);
-                edit.setHint(isPro() ? "RTSP/RTMP/HTTP/HLS地址" : "RTSP地址(格式为RTSP://...)");
-                final int hori = (int) getResources().getDimension(R.dimen.activity_horizontal_margin);
-                final int verti = (int) getResources().getDimension(R.dimen.activity_vertical_margin);
-                edit.setPadding(hori, verti, hori, verti);
+//                EditText edit = new EditText(PlaylistActivity.this);
+//                edit.setHint(isPro() ? "RTSP/RTMP/HTTP/HLS地址" : "RTSP地址(格式为RTSP://...)");
+//                final int hori = (int) getResources().getDimension(R.dimen.activity_horizontal_margin);
+//                final int verti = (int) getResources().getDimension(R.dimen.activity_vertical_margin);
+//                edit.setPadding(hori, verti, hori, verti);
 
 //                edit.setFilters(new InputFilter[]{new InputFilter() {
 //                    @Override
@@ -176,7 +177,12 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 //                        }
 //                    }
 //                }});
-                final AlertDialog dlg = new AlertDialog.Builder(PlaylistActivity.this).setView(edit).setTitle("请输入播放地址").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                View view = getLayoutInflater().inflate(R.layout.new_media_source_dialog, null);
+                final SwitchCompat sendOption = view.findViewById(R.id.send_option);
+                final SwitchCompat transportMode = view.findViewById(R.id.transport_mode);
+                final EditText edit = view.findViewById(R.id.new_media_source_url);
+                final AlertDialog dlg = new AlertDialog.Builder(PlaylistActivity.this).setView(view).setTitle("请输入播放地址").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String mRTSPUrl = String.valueOf(edit.getText());
@@ -194,8 +200,12 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 ////                                return;
 ////                            }
 //                        }
+
+
                         ContentValues cv = new ContentValues();
                         cv.put(VideoSource.URL, mRTSPUrl);
+                        cv.put(VideoSource.TRANSPORT_MODE, transportMode.isChecked() ? VideoSource.TRANSPORT_MODE_UDP : VideoSource.TRANSPORT_MODE_TCP);
+                        cv.put(VideoSource.SEND_OPTION, sendOption.isChecked() ? VideoSource.SEND_OPTION_TRUE : VideoSource.SEND_OPTION_FALSE);
                         TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv);
 
                         mCursor.close();
@@ -280,14 +290,17 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                     if (i == 0) {
                         mCursor.moveToPosition(pos);
                         String playUrl = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
+                        final int sendOptionValue = mCursor.getInt(mCursor.getColumnIndex(VideoSource.SEND_OPTION));
+                        final int transportModeValue = mCursor.getInt(mCursor.getColumnIndex(VideoSource.TRANSPORT_MODE));
                         final int _id = mCursor.getInt(mCursor.getColumnIndex(VideoSource._ID));
-                        final EditText edit = new EditText(PlaylistActivity.this);
-                        edit.setHint(isPro() ? "RTSP/RTMP/HLS地址" : "RTSP地址");
-                        final int hori = (int) getResources().getDimension(R.dimen.activity_horizontal_margin);
-                        final int verti = (int) getResources().getDimension(R.dimen.activity_vertical_margin);
-                        edit.setPadding(hori, verti, hori, verti);
+                        View view = getLayoutInflater().inflate(R.layout.new_media_source_dialog, null);
+                        final SwitchCompat sendOption = view.findViewById(R.id.send_option);
+                        sendOption.setChecked(sendOptionValue == VideoSource.SEND_OPTION_TRUE);
+                        final SwitchCompat transportMode = view.findViewById(R.id.transport_mode);
+                        transportMode.setChecked(transportModeValue == VideoSource.TRANSPORT_MODE_UDP);
+                        final EditText edit = view.findViewById(R.id.new_media_source_url);
                         edit.setText(playUrl);
-                        final AlertDialog alertDialog = new AlertDialog.Builder(PlaylistActivity.this).setView(edit).setTitle("请输入播放地址").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        final AlertDialog alertDialog = new AlertDialog.Builder(PlaylistActivity.this).setView(view).setTitle("请输入播放地址").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 String mRTSPUrl = String.valueOf(edit.getText());
@@ -296,6 +309,8 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                                 }
                                 ContentValues cv = new ContentValues();
                                 cv.put(VideoSource.URL, mRTSPUrl);
+                                cv.put(VideoSource.TRANSPORT_MODE, transportMode.isChecked() ? VideoSource.TRANSPORT_MODE_UDP : VideoSource.TRANSPORT_MODE_TCP);
+                                cv.put(VideoSource.SEND_OPTION, sendOption.isChecked() ? VideoSource.SEND_OPTION_TRUE : VideoSource.SEND_OPTION_FALSE);
                                 TheApp.sDB.update(VideoSource.TABLE_NAME, cv, VideoSource._ID + "=?", new String[]{String.valueOf(_id)});
 
                                 mCursor.close();
@@ -369,22 +384,28 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         if (pos != -1) {
             mCursor.moveToPosition(pos);
             String playUrl = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
+            int sendOption = mCursor.getInt(mCursor.getColumnIndex(VideoSource.SEND_OPTION));
+            int transportMode = mCursor.getInt(mCursor.getColumnIndex(VideoSource.TRANSPORT_MODE));
             if (!TextUtils.isEmpty(playUrl)) {
-                if (getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)){
+                if (getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)) {
                     Intent data = new Intent();
                     data.putExtra("url", playUrl);
+                    data.putExtra(VideoSource.SEND_OPTION, sendOption);
+                    data.putExtra(VideoSource.TRANSPORT_MODE, transportMode);
                     setResult(RESULT_OK, data);
                     finish();
-                }else {
+                } else {
                     if (BuildConfig.YUV_EXPORT) {
                         // YUV EXPORT DEMO..
                         Intent i = new Intent(PlaylistActivity.this, YUVExportActivity.class);
                         i.putExtra("play_url", playUrl);
                         mPos = pos;
                         startActivity(i);
-                    }else{
+                    } else {
                         Intent i = new Intent(PlaylistActivity.this, PlayActivity.class);
                         i.putExtra("play_url", playUrl);
+                        i.putExtra(VideoSource.SEND_OPTION, sendOption);
+                        i.putExtra(VideoSource.TRANSPORT_MODE, transportMode);
                         mPos = pos;
                         ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
                     }

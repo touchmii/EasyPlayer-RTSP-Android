@@ -60,18 +60,6 @@
             android:layout_marginRight="-1dp" />
 
         <CheckBox
-            android:id="@+id/transport_mode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:text="UDP模式观看视频(如果不勾选，表示使用TCP模式)"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/server_port"/>
-
-        <CheckBox
             android:id="@+id/sw_codec"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -81,7 +69,7 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/transport_mode" />
+            app:layout_constraintTop_toBottomOf="@+id/server_port" />
 
         <CheckBox
             android:id="@+id/auto_record"

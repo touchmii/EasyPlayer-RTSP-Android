@@ -62,7 +62,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String ARG_PARAM1 = "param1";
-    public static final String ARG_PARAM2 = "param2";
+    public static final String ARG_TRANSPORT_MODE = "ARG_TRANSPORT_MODE";
+    public static final String ARG_SEND_OPTION = "ARG_SEND_OPTION";
     public static final String ARG_PARAM3 = "param3";
     public static final int RESULT_REND_STARTED = 1;
     public static final int RESULT_REND_VIDEO_DISPLAYED = 2;
@@ -94,7 +95,12 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     // TODO: Rename and change types of parameters
     protected String mUrl;
+    /**
+     * 0或1表示TCP，2表示UDP
+     */
     protected int mType;
+
+    protected int sendOption;
 
     protected EasyPlayerClient mStreamRender;
     protected ResultReceiver mResultReceiver;
@@ -170,22 +176,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         }
     }
 
-    public static PlayFragment newInstance(Context context, String url, ResultReceiver rr) {
-        PlayFragment fragment = new PlayFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, url);
-        boolean useUDP = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.key_udp_mode), false);
-        args.putInt(ARG_PARAM2, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP);
-        args.putParcelable(ARG_PARAM3, rr);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
-    public static PlayFragment newInstance(String url, int type, ResultReceiver rr) {
+    public static PlayFragment newInstance(String url, int transportMode, int sendOption, ResultReceiver rr) {
         PlayFragment fragment = new PlayFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, url);
-        args.putInt(ARG_PARAM2, type);
+        args.putInt(ARG_TRANSPORT_MODE, transportMode);
+        args.putInt(ARG_SEND_OPTION, sendOption);
         args.putParcelable(ARG_PARAM3, rr);
         fragment.setArguments(args);
         return fragment;
@@ -196,7 +193,8 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mUrl = getArguments().getString(ARG_PARAM1);
-            mType = getArguments().getInt(ARG_PARAM2);
+            mType = getArguments().getInt(ARG_TRANSPORT_MODE);
+            sendOption = getArguments().getInt(ARG_SEND_OPTION);
             mRR = getArguments().getParcelable(ARG_PARAM3);
         }
     }
@@ -471,7 +469,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         f.mkdirs();
 
         try {
-            mStreamRender.start(mUrl, mType, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
+            mStreamRender.start(mUrl, mType<2?Client.TRANSTYPE_TCP:Client.TRANSTYPE_UDP, sendOption, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();

@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RadioGroup;
 
+import org.easydarwin.easyplayer.data.VideoSource;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
 
 public class MultiplayActivity extends AppCompatActivity implements PlayFragment.OnDoubleTapListener {
@@ -37,8 +38,10 @@ public class MultiplayActivity extends AppCompatActivity implements PlayFragment
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         String url = getIntent().getStringExtra(EXTRA_URL);
+        int transportMode = getIntent().getIntExtra(VideoSource.TRANSPORT_MODE, 0);
+        int sendOption = getIntent().getIntExtra(VideoSource.SEND_OPTION, 0);
         if (!TextUtils.isEmpty(url)) {
-            addVideoToHolder(url, R.id.play_fragment_holder1);
+            addVideoToHolder(url, transportMode,sendOption, R.id.play_fragment_holder1);
         }
         RadioGroup rg = findViewById(R.id.switch_display_wnd_radio_group);
 
@@ -112,8 +115,8 @@ public class MultiplayActivity extends AppCompatActivity implements PlayFragment
         mNextPlayHolder = p.getId();
     }
 
-    private void addVideoToHolder(String url, int holder){
-        PlayFragment f = PlayFragment.newInstance(this, url, rr);
+    private void addVideoToHolder(String url, int transportMode, int sendOption, int holder){
+        PlayFragment f = PlayFragment.newInstance(url, transportMode, sendOption, rr);
         /**
          * 铺满全屏
          */
@@ -129,7 +132,9 @@ public class MultiplayActivity extends AppCompatActivity implements PlayFragment
         if (requestCode == REQUEST_SELECT_ITEM_TO_PLAY){
             if (resultCode == RESULT_OK){
                 String url = data.getStringExtra("url");
-                addVideoToHolder(url, mNextPlayHolder);
+                int transportMode = data.getIntExtra(VideoSource.TRANSPORT_MODE, 0);
+                int sendOption = data.getIntExtra(VideoSource.SEND_OPTION, 0);
+                addVideoToHolder(url, transportMode, sendOption, mNextPlayHolder);
             }
         }
     }

@@ -43,11 +43,11 @@ public class TwoWndPlayActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-            PlayFragment fragment = PlayFragment.newInstance("rtsp://cloud.easydarwin.org:554/uvc_956.sdp", useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null);
+            PlayFragment fragment = PlayFragment.newInstance("rtsp://cloud.easydarwin.org:554/uvc_956.sdp", 0,0, null);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"second").hide(fragment).commit();
             fragment.setScaleType(++i);
 
-            fragment = PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null);
+            fragment = PlayFragment.newInstance(url, 0, 0, null);
             fragment.setScaleType(++i);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment,"first").commit();
             mRenderFragment = fragment;

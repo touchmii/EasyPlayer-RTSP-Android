@@ -37,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.easydarwin.easyplayer.data.VideoSource;
 import org.easydarwin.easyplayer.databinding.ActivityMainBinding;
 import org.easydarwin.easyplayer.fragments.ImageFragment;
 import org.easydarwin.easyplayer.fragments.PlayFragment;
@@ -229,147 +230,6 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     /**
-     * 请求添加新播放窗口
-     */
-    public void onAddWindow() {
-        new AlertDialog.Builder(PlayActivity.this).setTitle("新的播放窗口").setItems(new CharSequence[]{"选取历史播放记录", "手动输入视频源"}, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    final SharedPreferences preferences = getSharedPreferences("PlaylistActivity", MODE_PRIVATE);
-                    JSONArray mArray;
-                    try {
-                        mArray = new JSONArray(preferences.getString("play_list", "[\"rtsp://121.41.73.249/1001_home.sdp\"]"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        mArray = new JSONArray();
-                    }
-                    final CharSequence[] array = new CharSequence[mArray.length()];
-                    if (array.length == 0) {
-                        Toast.makeText(PlayActivity.this, "没有历史播放记录", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    for (int i = 0; i < array.length; i++) {
-                        array[i] = mArray.optString(i);
-                    }
-                    new AlertDialog.Builder(PlayActivity.this).setTitle("新的播放窗口").setItems(array, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            addVideoSource(String.valueOf(array[which]));
-                        }
-                    }).setNegativeButton(android.R.string.cancel, null).show();
-                } else {
-                    final EditText edit = new EditText(PlayActivity.this);
-                    final int hori = (int) getResources().getDimension(R.dimen.activity_horizontal_margin);
-                    final int verti = (int) getResources().getDimension(R.dimen.activity_vertical_margin);
-                    edit.setPadding(hori, verti, hori, verti);
-                    final AlertDialog dlg = new AlertDialog.Builder(PlayActivity.this).setView(edit).setTitle("请输入播放地址").setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            String url = String.valueOf(edit.getText());
-                            if (TextUtils.isEmpty(url)) {
-                                return;
-                            }
-                            final SharedPreferences preferences = getSharedPreferences("PlaylistActivity", MODE_PRIVATE);
-                            JSONArray mArray;
-                            try {
-                                mArray = new JSONArray(preferences.getString("play_list", "[\"rtsp://121.41.73.249/1001_home.sdp\"]"));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                mArray = new JSONArray();
-                            }
-                            mArray.put(url);
-                            preferences.edit().putString("play_list", String.valueOf(mArray)).apply();
-                            addVideoSource(url);
-                        }
-                    }).setNegativeButton("取消", null).create();
-                    dlg.setOnShowListener(new DialogInterface.OnShowListener() {
-                        @Override
-                        public void onShow(DialogInterface dialogInterface) {
-                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                            imm.showSoftInput(edit, InputMethodManager.SHOW_IMPLICIT);
-                        }
-                    });
-                    dlg.show();
-                }
-            }
-        }).show();
-    }
-
-    /**
-     * 增加一个视频窗口。每一个PlayFragment表示一个播放窗口,在这里会增加一个PlayFragment。
-     *
-     * @param url
-     */
-    private void addVideoSource(String url) {
-        final FrameLayout item = new FrameLayout(PlayActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        params.weight = 1;
-        item.setLayoutParams(params);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            item.setId(View.generateViewId());
-        } else {
-            item.setId(generateViewId());
-        }
-        mBinding.playerContainer.addView(item);
-        boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-        getSupportFragmentManager().beginTransaction().add(item.getId(), PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, null)).commit();
-    }
-
-    /**
-     * 删除一个播放窗口
-     *
-     * @param id
-     */
-    public void onRemoveVideoFragment(int id) {
-        getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(id)).commit();
-        mBinding.playerContainer.removeView(mBinding.playerContainer.findViewById(id));
-    }
-
-    /**
-     * 播放窗口被点击,此时app会弹出一个OptionFragment,并且绑定被点击的fragment(这样就会使能删除按钮,点击删除按钮,即可把此播放窗口删除)
-     *
-     * @param fragment
-     */
-    public void onPlayFragmentClicked(PlayFragment fragment) {
-        // 被绑定的窗口,呈选中状态
-        boolean enableMultiWnd = false;
-        if (!enableMultiWnd) {
-            return;
-        }
-        fragment.setSelected(true);
-        getSupportFragmentManager().beginTransaction().add(android.R.id.content, VideoWindowOptionMenuFragment.newInstance(fragment.getId())).addToBackStack(null).commit();
-    }
-
-    /**
-     * 播放窗口以外的区域被点击。此时app也弹出OptionFragment,但是不绑定播放窗口。这样的话不使能删除按钮。
-     *
-     * @param view
-     */
-    public void onOpenOptionMenu(View view) {
-        getSupportFragmentManager().beginTransaction().add(android.R.id.content, VideoWindowOptionMenuFragment.newInstance(0)).addToBackStack(null).commit();
-    }
-
-    /**
-     * 删除OptionFragment
-     *
-     * @param optionFragment
-     */
-    public void onRemoveOptionMenu(VideoWindowOptionMenuFragment optionFragment) {
-        getSupportFragmentManager().beginTransaction().remove(optionFragment).commit();
-        getSupportFragmentManager().popBackStack();
-
-        // 如果之前有绑定窗口,那先反选之
-        int attachedPlayFragmentId = optionFragment.getAttachedPlayFragmentId();
-        if (attachedPlayFragmentId != 0) {
-            PlayFragment fragment = (PlayFragment) getSupportFragmentManager().findFragmentById(attachedPlayFragmentId);
-            if (fragment != null) {
-                fragment.setSelected(false);
-            }
-        }
-    }
-
-    /**
      * 切换屏幕方向
      */
     public void onToggleOrientation() {
@@ -401,6 +261,8 @@ public class PlayActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String url = getIntent().getStringExtra("play_url");
+        int transportMode = getIntent().getIntExtra(VideoSource.TRANSPORT_MODE, 0);
+        int sendOption = getIntent().getIntExtra(VideoSource.SEND_OPTION, 0);
         if (TextUtils.isEmpty(url)) {
             finish();
             return;
@@ -425,8 +287,7 @@ public class PlayActivity extends AppCompatActivity {
                     }
                 };
             }
-            boolean useUDP = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.key_udp_mode), false);
-            PlayFragment fragment = PlayFragment.newInstance(url, useUDP ? Client.TRANSTYPE_UDP : Client.TRANSTYPE_TCP, rr);
+            PlayFragment fragment = PlayFragment.newInstance(url, transportMode,sendOption, rr);
             getSupportFragmentManager().beginTransaction().add(R.id.render_holder, fragment).commit();
             mRenderFragment = fragment;
         } else {

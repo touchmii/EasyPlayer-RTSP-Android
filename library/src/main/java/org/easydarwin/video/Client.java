@@ -47,6 +47,7 @@ public class Client implements Closeable {
     private int _mediaType;
     private String _user;
     private String _pwd;
+    private int _sendOption;
 
 
     public static final class FrameInfo {
@@ -183,13 +184,14 @@ public class Client implements Closeable {
         return getErrorCode(mCtx);
     }
 
-    public int openStream(int channel, String url, int type, int mediaType, String user, String pwd) {
+    public int openStream(int channel, String url, int type, int sendOption, int mediaType, String user, String pwd) {
         _channel = channel;
         _url = url;
         _type = type;
         _mediaType = mediaType;
         _user = user;
         _pwd = pwd;
+        _sendOption = sendOption;
         return openStream();
     }
 
@@ -213,27 +215,7 @@ public class Client implements Closeable {
         if (mCtx == 0){
             throw new IllegalStateException("初始化失败，KEY不合法");
         }
-        boolean options = false;
-        try {
-            URI url = new URI(_url);
-            String query = url.getQuery();
-            if (!TextUtils.isEmpty(query)){
-                String []slices = query.split("&");
-                for (String fragment : slices) {
-                    String []key_value = fragment.split("=");
-                    if (key_value.length == 2){
-                        if (key_value[0].equals("o")){
-                            if (key_value[1].equals("1")){
-                                options = true;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0, options ? 1:0);
+        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0, _sendOption);
     }
 
     private native int openStream(long context, int channel, String url, int type, int mediaType, String user, String pwd, int reconn, int outRtpPacket, int rtspOption);

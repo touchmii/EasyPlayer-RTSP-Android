@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.easydarwin.easyplayer.R;
@@ -41,7 +40,7 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         YUVExportFragment fragment = new YUVExportFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, url);
-        args.putInt(ARG_PARAM2, type);
+        args.putInt(ARG_TRANSPORT_MODE, type);
         args.putParcelable(ARG_PARAM3, rr);
         fragment.setArguments(args);
         return fragment;
@@ -121,7 +120,7 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         f.mkdirs();
 
         try {
-            mStreamRender.start(mUrl, mType, Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
+            mStreamRender.start(mUrl, mType, sendOption,Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
