@@ -68,6 +68,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         mBinding = DataBindingUtil.setContentView(this, R.layout.content_playlist);
 //        setContentView(R.layout.content_playlist);
         setSupportActionBar(mBinding.toolbar);
+        notifyAboutColorChange();
 
 
         mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
@@ -250,6 +251,17 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     update.doDownload();
                 }
+        }
+    }
+
+    private void notifyAboutColorChange() {
+        ImageView iv = findViewById(R.id.toolbar_about);
+        if (TheApp.activeDays >= 9999) {
+            iv.setImageResource(R.drawable.green);
+        }else if (TheApp.activeDays > 0){
+            iv.setImageResource(R.drawable.yellow);
+        }else {
+            iv.setImageResource(R.drawable.red);
         }
     }
 

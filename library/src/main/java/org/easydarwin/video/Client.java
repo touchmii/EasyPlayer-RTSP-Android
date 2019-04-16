@@ -180,6 +180,8 @@ public class Client implements Closeable {
         }
     }
 
+    public native static int getActiveDays(Context context,String key);
+
     public int getLastErrorCode() {
         return getErrorCode(mCtx);
     }
