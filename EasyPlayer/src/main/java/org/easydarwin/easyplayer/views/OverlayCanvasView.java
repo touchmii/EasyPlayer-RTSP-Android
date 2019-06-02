@@ -14,12 +14,10 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-
 /**
- * TODO: document your custom view class.
+ *
  */
 public class OverlayCanvasView extends View {
-
 
     private RectF mArcRec;
     private Paint mPaint;
@@ -47,7 +45,6 @@ public class OverlayCanvasView extends View {
     }
 
     private void init(AttributeSet attrs, int defStyle) {
-
         setBackgroundColor(Color.TRANSPARENT);
         // Set up a default TextPaint object
         mPaint = new Paint();
@@ -63,16 +60,16 @@ public class OverlayCanvasView extends View {
 
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         listener = new OnTouchListener() {
-
             RectF dstRect = new RectF();
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 float x1 = event.getX();
                 float y1 = event.getY();
 
-//                float x = x1;
-//                float y = y1;
-//
+                float x = x1;
+                float y = y1;
+
 //                float cx0 = getWidth() * 0.5f;
 //                float cy0 = getHeight() * 0.5f;
 //
@@ -83,24 +80,21 @@ public class OverlayCanvasView extends View {
 //
 //                x1 -= cx1;
 //                y1 -= cy1;
-
-//                y -= cy;
-//                x -= cx;
-
-                Matrix m = new Matrix();
-                mDrawMatrix.invert(m);
-
-                float[] src = {x1, y1};
-                m.mapPoints(src);
-                float x = src[0];
-                float y = src[1];
+//
+////                y -= cy;
+////                x -= cx;
+//
+//                Matrix m = new Matrix();
+//                mDrawMatrix.invert(m);
+//
+//                float[] src = {x1, y1};
+//                m.mapVectors(src);
 //                x = src[0];
 //                y = src[1];
 //                x += cx0;
 //                y += cy0;
 
 //                x - cx,y-cy;  在当前点.
-
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -123,7 +117,7 @@ public class OverlayCanvasView extends View {
         setOnTouchListener(listener);
     }
 
-    public void setTransMatrix(Matrix matrix){
+    public void setTransMatrix(Matrix matrix) {
         mDrawMatrix = matrix;
         invalidate();
     }
@@ -146,20 +140,18 @@ public class OverlayCanvasView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         final int saveCount = canvas.getSaveCount();
         canvas.save();
 
-        if (mDrawMatrix != null){
-
+        if (mDrawMatrix != null) {
             if (mDrawMatrix != null) {
-                canvas.concat(mDrawMatrix);
+//                canvas.concat(mDrawMatrix);
             }
-
         }
 
-        canvas.drawPath(mPath, mPaint);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-
+        canvas.drawPath(mPath, mPaint);
 
         canvas.restoreToCount(saveCount);
     }
@@ -170,11 +162,9 @@ public class OverlayCanvasView extends View {
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 
         mCanvas = new Canvas(mBitmap);
-
     }
 
     private float mX, mY;
-
     private static final float TOUCH_TOLERANCE = 4;
 
     private void touch_start(float x, float y) {
@@ -183,11 +173,12 @@ public class OverlayCanvasView extends View {
         mPath.moveTo(x, y);
         mX = x;
         mY = y;
-
     }
+
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
+
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
             mX = x;
@@ -212,7 +203,7 @@ public class OverlayCanvasView extends View {
         }
     }
 
-    public void clean(){
+    public void clean() {
         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
         mCanvas.drawColor(Color.TRANSPARENT);
         invalidate();

@@ -13,7 +13,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.easydarwin.easyplayer.PlaylistActivity;
+import org.easydarwin.easyplayer.activity.PlayListActivity;
 import org.easydarwin.easyplayer.R;
 
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class UpdateMgr {
             public void run() {
                 try {
                     String url;
-                    if (PlaylistActivity.isPro()) {
+                    if (PlayListActivity.isPro()) {
                         url = "http://www.easydarwin.org/versions/easyplayer_pro/version.txt";
                     }else{
                         url = "http://www.easydarwin.org/versions/easyplayer/version.txt";
@@ -99,7 +99,7 @@ public class UpdateMgr {
         new AlertDialog.Builder(mContext)
                 .setMessage("EasyPlayer可以升级到更高的版本，是否升级")
                 .setTitle("升级提示")
-                .setIcon(R.drawable.img_qrcode)
+                .setIcon(R.drawable.new_splash_rtsp)
                 .setPositiveButton("升级", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
