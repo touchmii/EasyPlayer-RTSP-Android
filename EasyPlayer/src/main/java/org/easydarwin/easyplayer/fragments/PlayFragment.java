@@ -273,6 +273,13 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        onVideoDisplayed();
+    }
+
+    @Override
     public void onDestroyView() {
         ViewGroup parent = (ViewGroup) getView().getParent();
         parent.removeOnLayoutChangeListener(listener);
@@ -307,7 +314,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
     private void onVideoDisplayed() {
         View view = getView();
         Log.i(TAG, String.format("VIDEO DISPLAYED!!!!%d*%d", mWidth, mHeight));
-//                    Toast.makeText(PlayActivity.this, "视频正在播放了", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(PlayActivity.this, "视频正在播放了", Toast.LENGTH_SHORT).show();
         view.findViewById(android.R.id.progress).setVisibility(View.GONE);
 
         mSurfaceView.post(new Runnable() {
