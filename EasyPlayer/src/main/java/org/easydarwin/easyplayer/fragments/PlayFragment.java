@@ -157,7 +157,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
         if (!TextUtils.isEmpty(mUrl)) {
             Glide.with(this)
-                    .load(PlayListActivity.url2localPosterFile(getActivity(), mUrl))
+                    .load(FileUtil.getSnapFile(mUrl))
                     .signature(new StringSignature(UUID.randomUUID().toString()))
                     .fitCenter()
                     .into(cover);
@@ -316,7 +316,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                 if (mWidth != 0 && mHeight != 0) {
                     Bitmap e = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
                     mSurfaceView.getBitmap(e);
-                    File f = PlayListActivity.url2localPosterFile(mSurfaceView.getContext(), mUrl);
+                    File f = FileUtil.getSnapFile(mUrl);
                     saveBitmapInFile(f.getPath(), e);
                     e.recycle();
                 }
@@ -329,10 +329,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
 
     public boolean onRecordOrStop() {
         if (!mStreamRender.isRecording()) {
-            File f = new File(FileUtil.getMoviePath(mUrl));
-            f.mkdirs();
-
-            mStreamRender.startRecord(new File(f, new SimpleDateFormat("yy_MM_dd HH_mm_ss").format(new Date()) + ".mp4").getPath());
+            mStreamRender.startRecord(FileUtil.getMovieName(mUrl).getPath());
             return true;
         } else {
             mStreamRender.stopRecord();
@@ -365,7 +362,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                     Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG,
                     "",
                     "",
-                    autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
+                    autoRecord ? FileUtil.getMovieName(mUrl).getPath() : null);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -700,7 +697,11 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
         this.mUrl = url;
 
         if (!TextUtils.isEmpty(mUrl)) {
-            Glide.with(this).load(PlayListActivity.url2localPosterFile(getActivity(), mUrl)).signature(new StringSignature(UUID.randomUUID().toString())).fitCenter().into(cover);
+            Glide.with(this)
+                    .load(FileUtil.getSnapFile(mUrl))
+                    .signature(new StringSignature(UUID.randomUUID().toString()))
+                    .fitCenter()
+                    .into(cover);
         }
     }
 

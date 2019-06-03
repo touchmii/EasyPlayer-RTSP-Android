@@ -43,6 +43,7 @@ import org.easydarwin.easyplayer.TheApp;
 import org.easydarwin.easyplayer.data.VideoSource;
 import org.easydarwin.easyplayer.databinding.ActivityPlayListBinding;
 import org.easydarwin.easyplayer.databinding.VideoSourceItemBinding;
+import org.easydarwin.easyplayer.util.FileUtil;
 import org.easydarwin.easyplayer.util.SPUtil;
 import org.easydarwin.update.UpdateMgr;
 
@@ -129,7 +130,7 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                     plvh.mTextView.setText(url);
                 }
 
-                File file = url2localPosterFile(PlayListActivity.this, url);
+                File file = FileUtil.getSnapFile(url);
                 Glide.with(PlayListActivity.this).load(file).signature(new StringSignature(UUID.randomUUID().toString())).placeholder(R.drawable.placeholder).centerCrop().into(plvh.mImageView);
 
                 int audienceNumber = mCursor.getInt(mCursor.getColumnIndex(VideoSource.AUDIENCE_NUMBER));
@@ -441,19 +442,6 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
 
     public static boolean isPro() {
         return BuildConfig.FLAVOR.equals("pro");
-    }
-
-    public static File url2localPosterFile(Context context, String url) {
-        MessageDigest messageDigest;
-
-        try {
-            messageDigest = MessageDigest.getInstance("MD5");
-            byte[] result = messageDigest.digest(url.getBytes());
-            return new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), Base64.encodeToString(result, Base64.NO_WRAP | Base64.URL_SAFE));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public void onMultiPlay(View view) {

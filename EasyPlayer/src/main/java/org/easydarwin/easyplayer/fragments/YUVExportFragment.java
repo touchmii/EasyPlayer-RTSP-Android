@@ -123,7 +123,13 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         f.mkdirs();
 
         try {
-            mStreamRender.start(mUrl, mType, sendOption,Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG, "", "", autoRecord ? new File(f, new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()) + ".mp4").getPath() : null);
+            mStreamRender.start(mUrl,
+                    mType,
+                    sendOption,
+                    Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG,
+                    "",
+                    "",
+                    autoRecord ? FileUtil.getMovieName(mUrl).getPath() : null);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();

@@ -430,11 +430,7 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            File file = new File(FileUtil.getPicturePath(url));
-            file.mkdirs();
-            file = new File(file, new SimpleDateFormat("yy_MM_dd HH_mm_ss").format(new Date()) + ".jpg");
-
-            mRenderFragment.takePicture(file.getPath());
+            mRenderFragment.takePicture(FileUtil.getPictureName(url).getPath());
 
             if (mSoundPool != null) {
                 mSoundPool.play(mTalkPictureSound, mAudioVolumn, mAudioVolumn, 1, 0, 1.0f);
