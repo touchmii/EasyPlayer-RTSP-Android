@@ -3,12 +3,13 @@
 EasyPlayer-**RTSP Android** 播放器是由[TSINGSEE青犀开放平台](http://open.tsingsee.com "TSINGSEE青犀开放平台")开发和维护的一个完善的RTSP流媒体播放器项目，视频编码支持**H.264**，**H.265**，**MPEG4**，**MJPEG**，音频支持**G711A**，**G711U**，**G726**，**AAC**，支持RTSP over TCP/UDP协议，支持**硬解码**，是一套极佳的安防流媒体平台播放组件！EasyPlayer-RTSP Android 安卓版本经过了很多年的发展和迭代，已经非常稳定、完整，功能包括：直播、录像、抓图，支持指令集包括armv7a、armv8a、x86，应该说是目前市面上功能性、稳定性和完整性最强的一款RTSP播放器！
 
 ## 工程结构 Project structure ##
-```
-EasyPlayer_Android
-|-EasyPlayer            APP module
-|-simpleplayer          simplest demo module
-|-library               library module
-```
+
+
+	EasyPlayer_Android
+	|-EasyPlayer            APP module
+	|-simpleplayer          simplest demo module
+	|-library               library module
+
 
 
 ## 工作流程 ##
@@ -50,14 +51,6 @@ Android：Android Studio编译；
 
 ![EasyPlayer Pro 版](http://www.easydarwin.org/github/images/easyplayerprofirim20170205.png)
 
-
-## DEMO效果 ##
-
-![EasyPlayer Android](https://raw.githubusercontent.com/EasyDarwin/EasyPlayer_Android/master/EasyPlayer/screenshot/single_video.jpg?raw=true)
-
-## EasyPlayer项目集群说明 ##
-
-![集成说明](https://github.com/EasyDSS/EasyPlayer-RTSP-Android/wiki/EasyPlayer-%E9%9B%86%E6%88%90%E8%AF%B4%E6%98%8E)
 
 ### √ EasyPlayer-RTSP ###
 
@@ -109,6 +102,6 @@ Android：Android Studio编译；
 
 **EasyNVR**无插件直播方案：[www.EasyNVR.com](http://www.easynvr.com)
 
-Copyright &copy; EasyDarwin Team 2012-2018
+Copyright &copy; EasyDarwin Team 2012-2019
 
 ![EasyDarwin](http://www.easydarwin.org/skin/easydarwin/images/wx_qrcode.jpg)
