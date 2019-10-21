@@ -12,12 +12,13 @@ public class EasyMuxer2 {
         System.loadLibrary("proffmpeg");
         System.loadLibrary("VideoCodecer");
     }
+
     public static final int AVMEDIA_TYPE_VIDEO  = 0;
     public static final int AVMEDIA_TYPE_AUDIO  = 1;
 
-
     public static final int VIDEO_TYPE_H264 = 0;
     public static final int VIDEO_TYPE_H265 = 1;
+
     @Native
     private long ctx;
 
