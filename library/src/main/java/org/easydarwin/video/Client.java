@@ -353,7 +353,8 @@ public class Client implements Closeable {
     }
 
     private static void onEvent(int channel, int err, int state) {
-        // state：1、连接中，2、连接错误，3、连接线程退出
+        // state：1 Connecting, 2 连接错误, 3 连接线程退出
+        // err的含义：http请求的返回码（200，400，401等等）
         Log.e(TAG, String.format("__RTSPClientCallBack onEvent: err=%d, state=%d", err, state));
 
         synchronized (sCallbacks) {

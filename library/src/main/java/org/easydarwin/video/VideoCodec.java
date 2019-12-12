@@ -30,11 +30,9 @@ public class VideoCodec {
 
     public int decoder_create(Object surface, int codec) {
         mHandle = create(surface, codec);
-
         if (mHandle != 0) {
             return 0;
         }
-
         return -1;
     }
 
@@ -48,6 +46,7 @@ public class VideoCodec {
         return buffer;
     }
 
+
     public void decoder_releaseBuffer(ByteBuffer buffer) {
         releaseYUV(buffer);
     }
@@ -56,16 +55,18 @@ public class VideoCodec {
         decodeYUV2(mHandle, buffer, width, height);
     }
 
+
     public void decoder_close() {
         if (mHandle == 0) {
             return;
         }
-
         close(mHandle);
         mHandle = 0;
     }
 
+
     public static class VideoDecoderLite extends VideoCodec {
+
         private int[] mSize;
         private Object surface;
 
@@ -95,5 +96,6 @@ public class VideoCodec {
         protected void releaseBuffer(ByteBuffer buffer){
             decoder_releaseBuffer(buffer);
         }
+
     }
 }

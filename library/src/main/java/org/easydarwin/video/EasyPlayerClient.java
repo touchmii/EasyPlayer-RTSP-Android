@@ -19,8 +19,10 @@ import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Surface;
 import android.view.TextureView;
 
@@ -36,14 +38,19 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar;
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar;
 import static org.easydarwin.util.CodecSpecificDataUtil.AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE;
@@ -1523,12 +1530,35 @@ public class EasyPlayerClient implements Client.SourceCallBack {
     }
 
     @Override
-    public void onEvent(int channel, int err, int state) {
+    public void onEvent(int channel, int err, int info) {
         ResultReceiver rr = mRR;
         Bundle resultData = new Bundle();
-        resultData.putInt("state", state);
+        /*
+            int state = 0;
+        int err = EasyRTSP_GetErrCode(fRTSPHandle);
+		// EasyRTSPClient开始进行连接，建立EasyRTSPClient连接线程
+		if (NULL == _pBuf && NULL == _frameInfo)
+		{
+			LOGD("Recv Event: Connecting...");
+			state = 1;
+		}
 
-        switch (state) {
+		// EasyPlayerClient RTSPClient连接错误，错误码通过EasyRTSP_GetErrCode()接口获取，比如404
+		else if (NULL != _frameInfo && _frameInfo->codec == EASY_SDK_EVENT_CODEC_ERROR)
+		{
+			LOGD("Recv Event: Error:%d ...\n", err);
+			state = 2;
+		}
+
+		// EasyRTSPClient连接线程退出，此时上层应该停止相关调用，复位连接按钮等状态
+		else if (NULL != _frameInfo && _frameInfo->codec == EASY_SDK_EVENT_CODEC_EXIT)
+		{
+			LOGD("Recv Event: Exit,Error:%d ...", err);
+			state = 3;
+		}
+
+        * */
+        switch (info) {
             case 1:
                 resultData.putString("event-msg", "连接中...");
                 break;
