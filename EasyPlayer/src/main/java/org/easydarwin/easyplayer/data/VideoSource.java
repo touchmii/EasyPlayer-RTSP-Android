@@ -19,8 +19,8 @@ public class VideoSource implements BaseColumns {
     public static final String TRANSPORT_MODE = "transport_mode";   // TCP/UDP
     public static final String SEND_OPTION = "send_option";         // 发送活性包
 
-    public static final int SEND_OPTION_TRUE = 0;
-    public static final int SEND_OPTION_FALSE = 1;
+    public static final int SEND_OPTION_TRUE = 1;
+    public static final int SEND_OPTION_FALSE = 0;
 
     public static final int TRANSPORT_MODE_TCP = 1;
     public static final int TRANSPORT_MODE_UDP = 2;
