@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.app.AppCompatActivity;
@@ -67,13 +68,19 @@ public class MediaFilesActivity extends AppCompatActivity {
                 String text = position == 0 ? "抓拍" : "录像";
                 SpannableStringBuilder ssb = new SpannableStringBuilder(text);
 
-                ForegroundColorSpan fcs = new ForegroundColorSpan(getResources().getColor(R.color.colorTheme2));//字体颜色设置为绿色
+                ForegroundColorSpan fcs = new ForegroundColorSpan(getResources().getColor(R.color.color_theme2));//字体颜色设置为绿色
                 ssb.setSpan(fcs, 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);//设置字体颜色
                 ssb.setSpan(new RelativeSizeSpan(1f), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                 return ssb;
             }
         });
+
+        //取消严格模式  FileProvider
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
     }
 
     @Override

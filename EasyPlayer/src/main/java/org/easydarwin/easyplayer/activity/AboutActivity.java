@@ -9,9 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.URLSpan;
 import android.view.View;
 
 import org.easydarwin.easyplayer.R;
@@ -50,19 +48,19 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         SpannableString ss;
         if (TheApp.activeDays >= 9999) {
             ss = new SpannableString("激活码永久有效");
-            ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorGREEN)),
+            ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.color_green)),
                     0,
                     ss.length(),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
         } else if (TheApp.activeDays > 0) {
             ss = new SpannableString(String.format("激活码还剩%d天可用", TheApp.activeDays));
-            ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorYELLOW)),
+            ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.color_yellow)),
                     0,
                     ss.length(),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
         } else {
             ss = new SpannableString(String.format("激活码已过期(%d)", TheApp.activeDays));
-            ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorRED)),
+            ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.color_red)),
                     0,
                     ss.length(),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
@@ -73,7 +71,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
 
         binding.darwinTv2.setText("您也可以升级到我们的EasyPlayer Pro全功能版 本，支持HTTP/RTSP/RTMP/HLS等多种流媒体协议！");
         SpannableString ss2 = new SpannableString("戳我");
-        ss2.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorTheme2)),
+        ss2.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.color_theme2)),
                 0,
                 ss2.length(),
                 Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
@@ -82,7 +80,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
 
         binding.darwinTv.setText("项目地址：");
         SpannableString ss3 = new SpannableString(EP_URL);
-        ss3.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorTheme2)),
+        ss3.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.color_theme2)),
                 0,
                 ss3.length(),
                 Spanned.SPAN_INCLUSIVE_EXCLUSIVE);

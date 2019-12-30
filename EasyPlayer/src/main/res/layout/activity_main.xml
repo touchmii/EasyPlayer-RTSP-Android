@@ -8,7 +8,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context=".activity.PlayActivity"
-        android:background="@color/colorWhite">
+        android:background="@color/color_white">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -89,7 +89,7 @@
                     android:gravity="center"
                     android:text="0kbps"
                     android:textSize="13sp"
-                    android:textColor="@color/colorTheme2" />
+                    android:textColor="@color/color_theme2" />
 
                 <ImageButton
                     android:id="@+id/live_video_bar_enable_audio"
