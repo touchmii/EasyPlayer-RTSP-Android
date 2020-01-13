@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -25,13 +26,10 @@ import org.easydarwin.video.EasyPlayerClient;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by apple on 2017/12/30.
  */
-
 public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.I420DataCallback{
 
     OverlayCanvasView canvas;
@@ -139,31 +137,6 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
         sendResult(RESULT_REND_START, null);
     }
 
-    /**
-     * 这个buffer对象在回调结束之后会变无效.所以不可以把它保存下来用.如果需要保存,必须要创建新buffer,并拷贝数据.
-     * @param buffer
-     */
-    @Override
-    public void onI420Data(ByteBuffer buffer) {
-        Log.i(TAG, "I420 data length :" + buffer.capacity());
-
-        // save to local...
-//        writeToFile("/sdcard/tmp.yuv", buffer);
-    }
-
-//    private void writeToFile(String path, ByteBuffer buffer){
-//        try {
-//            FileOutputStream fos = new FileOutputStream(path, true);
-//            byte[] in = new byte[buffer.capacity()];
-//            buffer.clear();
-//            buffer.get(in);
-//            fos.write(in);
-//            fos.close();
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//        }
-//    }
-
     @Override
     public void onMatrixChanged(Matrix matrix, RectF rect) {
         super.onMatrixChanged(matrix, rect);
@@ -176,4 +149,57 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
     public void toggleDraw() {
         canvas.toggleDrawable();
     }
+
+    /**
+     * 这个buffer对象在回调结束之后会变无效.所以不可以把它保存下来用.如果需要保存,必须要创建新buffer,并拷贝数据.
+     * @param buffer
+     */
+    @Override
+    public void onI420Data(ByteBuffer buffer) {
+        Log.i(TAG, "I420 data length :" + buffer.capacity());
+
+//        writeToFile("/sdcard/tmp.yuv", buffer);
+    }
+
+    @Override
+    public void onPcmData(byte[] pcm) {
+        Log.i(TAG, "pcm data length :" + pcm.length);
+
+//        save2path(pcm, 0, pcm.length,path + "/" + "audio.pcm", true);
+    }
+
+//    private String path = Environment.getExternalStorageDirectory() +"/EasyPlayerRTSP";
+//
+//    private static void save2path(byte[] buffer, int offset, int length, String path, boolean append) {
+//        FileOutputStream fos = null;
+//        try {
+//            fos = new FileOutputStream(path, append);
+//            fos.write(buffer, offset, length);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (fos != null) {
+//                try {
+//                    fos.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
+//
+//    private void writeToFile(String path, ByteBuffer buffer){
+//        try {
+//            FileOutputStream fos = new FileOutputStream(path, true);
+//            byte[] in = new byte[buffer.capacity()];
+//            buffer.clear();
+//            buffer.get(in);
+//            fos.write(in);
+//            fos.close();
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//        }
+//    }
 }

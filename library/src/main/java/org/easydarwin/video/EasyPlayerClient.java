@@ -465,6 +465,7 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 
     public static interface I420DataCallback {
         public void onI420Data(ByteBuffer buffer);
+        public void onPcmData(byte[] pcm);
     }
 
     public void pause() {
@@ -1287,13 +1288,20 @@ public class EasyPlayerClient implements Client.SourceCallBack {
 
 
     private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
+        i420callback.onPcmData(pcm);
+
         EasyMuxer2 muxer2 = this.muxer2;
-        if (muxer2 == null) return;
-        if (mRecordingStatus < 0) return;
+        if (muxer2 == null)
+            return;
+
+        if (mRecordingStatus < 0)
+            return;
+
         if (mMuxerWaitingKeyVideo) {
             Log.i(TAG, "writeFrame ignore due to no key frame!");
             return;
         }
+
         long timeStampMillis = stampUS/1000;
         timeStampMillis -= mMuxerCuttingMillis;
         timeStampMillis = Math.max(0, timeStampMillis);
