@@ -983,8 +983,11 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                                     int[] size = new int[2];
 //                                mDecoder.decodeFrame(frameInfo, size);
                                     ByteBuffer buf = mDecoder.decodeFrameYUV(frameInfo, size);
-                                    if (i420callback != null && buf != null)
+
+                                    if (i420callback != null && buf != null) {
                                         i420callback.onI420Data(buf);
+                                    }
+
                                     if (buf != null) mDecoder.releaseBuffer(buf);
                                     long decodeSpend = SystemClock.elapsedRealtime() - decodeBegin;
 
@@ -1286,9 +1289,10 @@ public class EasyPlayerClient implements Client.SourceCallBack {
         }
     }
 
-
     private synchronized void pumpPCMSample(byte[] pcm, int length, long stampUS) {
-        i420callback.onPcmData(pcm);
+        if (i420callback != null && pcm != null) {
+            i420callback.onPcmData(pcm);
+        }
 
         EasyMuxer2 muxer2 = this.muxer2;
         if (muxer2 == null)
