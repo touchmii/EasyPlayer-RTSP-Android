@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 /**
  * Created by John on 2017/1/5.
  */
-
 public class VideoCodec {
 
     static {
@@ -22,30 +21,32 @@ public class VideoCodec {
 
     protected long mHandle;
 
-    private native int decode(long handle, byte[] in, int offset, int length,int []size);
-    private native ByteBuffer decodeYUV(long handle, byte[] in, int offset, int length, int []size);
+    private native int decode(long handle, byte[] in, int offset, int length, int[] size);
+
+    private native ByteBuffer decodeYUV(long handle, byte[] in, int offset, int length, int[] size);
+
     private native void releaseYUV(ByteBuffer buffer);
 
-    private native void decodeYUV2(long handle,ByteBuffer buffer, int width, int height);
+    private native void decodeYUV2(long handle, ByteBuffer buffer, int width, int height);
 
     public int decoder_create(Object surface, int codec) {
         mHandle = create(surface, codec);
         if (mHandle != 0) {
             return 0;
         }
+
         return -1;
     }
 
-    public int decoder_decode(byte[] in, int offset, int length, int[]size) {
+    public int decoder_decode(byte[] in, int offset, int length, int[] size) {
         int result = decode(mHandle, in, offset, length, size);
         return result;
     }
 
-    public ByteBuffer decoder_decodeYUV(byte[] in, int offset, int length, int[]size) {
-        ByteBuffer  buffer = decodeYUV(mHandle, in, offset, length, size);
+    public ByteBuffer decoder_decodeYUV(byte[] in, int offset, int length, int[] size) {
+        ByteBuffer buffer = decodeYUV(mHandle, in, offset, length, size);
         return buffer;
     }
-
 
     public void decoder_releaseBuffer(ByteBuffer buffer) {
         releaseYUV(buffer);
@@ -55,15 +56,14 @@ public class VideoCodec {
         decodeYUV2(mHandle, buffer, width, height);
     }
 
-
     public void decoder_close() {
         if (mHandle == 0) {
             return;
         }
+
         close(mHandle);
         mHandle = 0;
     }
-
 
     public static class VideoDecoderLite extends VideoCodec {
 
@@ -85,17 +85,16 @@ public class VideoCodec {
 
         protected int decodeFrame(Client.FrameInfo aFrame, int[] size) {
             int nRet = 0;
-            nRet = decoder_decode( aFrame.buffer, aFrame.offset, aFrame.length, size);
+            nRet = decoder_decode(aFrame.buffer, aFrame.offset, aFrame.length, size);
             return nRet;
         }
 
-        protected ByteBuffer decodeFrameYUV(Client.FrameInfo aFrame, int []size) {
-            return decoder_decodeYUV( aFrame.buffer, aFrame.offset, aFrame.length, size);
+        protected ByteBuffer decodeFrameYUV(Client.FrameInfo aFrame, int[] size) {
+            return decoder_decodeYUV(aFrame.buffer, aFrame.offset, aFrame.length, size);
         }
 
-        protected void releaseBuffer(ByteBuffer buffer){
+        protected void releaseBuffer(ByteBuffer buffer) {
             decoder_releaseBuffer(buffer);
         }
-
     }
 }

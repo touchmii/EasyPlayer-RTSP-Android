@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -14,8 +13,6 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
@@ -41,6 +38,7 @@ public class Client implements Closeable {
             }
         }
     };
+
     private int _channel;
     private String _url;
     private int _type;
@@ -49,30 +47,29 @@ public class Client implements Closeable {
     private String _pwd;
     private int _sendOption;
 
-
     public static final class FrameInfo {
-        public int codec;			/* 音视频格式 */
+        public int codec;           /* 音视频格式 */
 
-        public int type;			/* 视频帧类型 */
-        public byte fps;			/* 视频帧率 */
-        public short width;			/* 视频宽 */
-        public short height;			/* 视频高 */
+        public int type;            /* 视频帧类型 */
+        public byte fps;            /* 视频帧率 */
+        public short width;         /* 视频宽 */
+        public short height;        /* 视频高 */
 
-        public int reserved1;			/* 保留参数1 */
-        public int reserved2;			/* 保留参数2 */
+        public int reserved1;       /* 保留参数1 */
+        public int reserved2;       /* 保留参数2 */
 
-        public int sample_rate;	/* 音频采样率 */
-        public int channels;		/* 音频声道数 */
-        public int bits_per_sample;	/* 音频采样精度 */
+        public int sample_rate;     /* 音频采样率 */
+        public int channels;        /* 音频声道数 */
+        public int bits_per_sample; /* 音频采样精度 */
 
-        public int length;			/* 音视频帧大小 */
-        public long timestamp_usec;	/* 时间戳,微妙 */
-        public long timestamp_sec;	/* 时间戳 秒 */
+        public int length;          /* 音视频帧大小 */
+        public long timestamp_usec; /* 时间戳,微妙 */
+        public long timestamp_sec;  /* 时间戳 秒 */
 
         public long stamp;
 
-        public float bitrate;		/* 比特率 */
-        public float losspacket;		/* 丢包率 */
+        public float bitrate;       /* 比特率 */
+        public float losspacket;    /* 丢包率 */
 
         public byte[] buffer;
         public int offset = 0;
@@ -104,7 +101,6 @@ public class Client implements Closeable {
         byte[] sps;
         byte[] pps;
 
-
         @Override
         public String toString() {
             return "MediaInfo{" +
@@ -128,16 +124,15 @@ public class Client implements Closeable {
         void onEvent(int _channelId, int err, int info);
     }
 
-
     public static final int EASY_SDK_VIDEO_FRAME_FLAG = 0x01;
     public static final int EASY_SDK_AUDIO_FRAME_FLAG = 0x02;
     public static final int EASY_SDK_EVENT_FRAME_FLAG = 0x04;
-    public static final int EASY_SDK_RTP_FRAME_FLAG = 0x08;		/* RTP帧标志 */
-    public static final int EASY_SDK_SDP_FRAME_FLAG = 0x10;		/* SDP帧标志 */
-    public static final int EASY_SDK_MEDIA_INFO_FLAG = 0x20;		/* 媒体类型标志*/
+    public static final int EASY_SDK_RTP_FRAME_FLAG = 0x08;        /* RTP帧标志 */
+    public static final int EASY_SDK_SDP_FRAME_FLAG = 0x10;        /* SDP帧标志 */
+    public static final int EASY_SDK_MEDIA_INFO_FLAG = 0x20;        /* 媒体类型标志*/
 
-    public static final int EASY_SDK_EVENT_CODEC_ERROR = 0x63657272;	/* ERROR */
-    public static final int EASY_SDK_EVENT_CODEC_EXIT = 0x65786974;	/* EXIT */
+    public static final int EASY_SDK_EVENT_CODEC_ERROR = 0x63657272;    /* ERROR */
+    public static final int EASY_SDK_EVENT_CODEC_EXIT = 0x65786974;    /* EXIT */
 
     public static final int TRANSTYPE_TCP = 1;
     public static final int TRANSTYPE_UDP = 2;
@@ -154,13 +149,16 @@ public class Client implements Closeable {
         if (key == null) {
             throw new NullPointerException();
         }
+
         if (context == null) {
             throw new NullPointerException();
         }
+
         mCtx = init(context, key);
         mContext = context.getApplicationContext();
+
         if (mCtx == 0 || mCtx == -1) {
-            Log.wtf(TAG, new IllegalArgumentException("初始化失败，KEY不合法！")) ;
+            Log.wtf(TAG, new IllegalArgumentException("初始化失败，KEY不合法！"));
         }
     }
 
@@ -180,7 +178,7 @@ public class Client implements Closeable {
         }
     }
 
-    public native static int getActiveDays(Context context,String key);
+    public native static int getActiveDays(Context context, String key);
 
     public int getLastErrorCode() {
         return getErrorCode(mCtx);
@@ -199,7 +197,8 @@ public class Client implements Closeable {
 
     public void closeStream() {
         h.removeCallbacks(closeTask);
-        if (mCtx != 0){
+
+        if (mCtx != 0) {
             closeStream(mCtx);
         }
     }
@@ -214,9 +213,11 @@ public class Client implements Closeable {
         if (null == _url) {
             throw new NullPointerException();
         }
-        if (mCtx == 0){
+
+        if (mCtx == 0) {
             throw new IllegalStateException("初始化失败，KEY不合法");
         }
+
         return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0, _sendOption);
     }
 
@@ -228,9 +229,9 @@ public class Client implements Closeable {
 
     private native void closeStream(long context);
 
-
     private static void save2path(byte[] buffer, int offset, int length, String path, boolean append) {
         FileOutputStream fos = null;
+
         try {
             fos = new FileOutputStream(path, append);
             fos.write(buffer, offset, length);
@@ -252,8 +253,7 @@ public class Client implements Closeable {
     private static void onSourceCallBack(int _channelId, int _channelPtr, int _frameType, byte[] pBuf, byte[] frameBuffer) {
         if (BuildConfig.MEDIA_DEBUG) {
 
-            int permissionCheck = ContextCompat.checkSelfPermission(mContext,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int permissionCheck = ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
                 // frameType + size + buffer
                 if (_frameType != 0) {
@@ -271,10 +271,12 @@ public class Client implements Closeable {
                 }
             }
         }
+
         final SourceCallBack callBack;
         synchronized (sCallbacks) {
             callBack = sCallbacks.get(_channelId);
         }
+
         if (_frameType == 0) {
             if (callBack != null) {
                 callBack.onSourceCallBack(_channelId, _channelPtr, _frameType, null);
@@ -344,9 +346,10 @@ public class Client implements Closeable {
         synchronized (_channelPause) {
             paused = _channelPause.contains(_channelId);
         }
+
         if (callBack != null) {
-            if (paused){
-                Log.i(TAG,"channel_" + _channelId + " is paused!");
+            if (paused) {
+                Log.i(TAG, "channel_" + _channelId + " is paused!");
             }
             callBack.onSourceCallBack(_channelId, _channelPtr, _frameType, fi);
         }
@@ -365,32 +368,37 @@ public class Client implements Closeable {
         }
     }
 
-
     public void pause() {
-        if (Looper.myLooper() != Looper.getMainLooper()){
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new IllegalThreadStateException("please call pause in Main thread!");
         }
+
         synchronized (_channelPause) {
             _channelPause.add(_channel);
         }
+
         paused = 1;
-        Log.i(TAG,"pause:=" + 1);
+        Log.i(TAG, "pause:=" + 1);
         h.postDelayed(closeTask, 10000);
     }
 
     public void resume() {
-        if (Looper.myLooper() != Looper.getMainLooper()){
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new IllegalThreadStateException("call resume in Main thread!");
         }
+
         synchronized (_channelPause) {
             _channelPause.remove(_channel);
         }
+
         h.removeCallbacks(closeTask);
-        if (paused == 2){
-            Log.i(TAG,"resume:=" + 0);
+
+        if (paused == 2) {
+            Log.i(TAG, "resume:=" + 0);
             openStream();
         }
-        Log.i(TAG,"resume:=" + 0);
+
+        Log.i(TAG, "resume:=" + 0);
         paused = 0;
     }
 
@@ -398,7 +406,10 @@ public class Client implements Closeable {
     public void close() throws IOException {
         h.removeCallbacks(closeTask);
         _channelPause.remove(_channel);
-        if (mCtx == 0) throw new IOException("not opened or already closed");
+
+        if (mCtx == 0)
+            throw new IOException("not opened or already closed");
+
         deInit(mCtx);
         mCtx = 0;
     }

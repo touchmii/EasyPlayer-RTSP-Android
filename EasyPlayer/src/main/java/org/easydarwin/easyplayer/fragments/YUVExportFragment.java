@@ -2,9 +2,12 @@ package org.easydarwin.easyplayer.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.YuvImage;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ResultReceiver;
@@ -21,16 +24,21 @@ import android.widget.Toast;
 import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.util.FileUtil;
 import org.easydarwin.easyplayer.views.OverlayCanvasView;
+import org.easydarwin.sw.JNIUtil;
 import org.easydarwin.video.Client;
 import org.easydarwin.video.EasyPlayerClient;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * Created by apple on 2017/12/30.
  */
-public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.I420DataCallback{
+public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.I420DataCallback {
 
     OverlayCanvasView canvas;
     boolean recordPaused = false;
@@ -65,18 +73,18 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
                 }
 
                 if (mStreamRender == null) {
-                    Toast.makeText(getActivity(), "未开始播放,录像失败",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "未开始播放,录像失败", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (mStreamRender.isRecording()){
+                if (mStreamRender.isRecording()) {
                     mStreamRender.stopRecord();
 
-                    Toast.makeText(getActivity(), "停止录像，路径：/sdcard/test.mp4",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "停止录像，路径：/sdcard/test.mp4", Toast.LENGTH_SHORT).show();
                 } else {
                     mStreamRender.startRecord("/sdcard/test.mp4");
 
-                    Toast.makeText(getActivity(), "开始录像，路径：/sdcard/test.mp4",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "开始录像，路径：/sdcard/test.mp4", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -85,12 +93,12 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
             @Override
             public void onClick(View v) {
                 if (mStreamRender == null) {
-                    Toast.makeText(getActivity(), "未开始录像1",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "未开始录像1", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (!mStreamRender.isRecording()){
-                    Toast.makeText(getActivity(), "未开始录像2",Toast.LENGTH_SHORT).show();
+                if (!mStreamRender.isRecording()) {
+                    Toast.makeText(getActivity(), "未开始录像2", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -102,9 +110,9 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
                 recordPaused = !recordPaused;
 
                 if (recordPaused) {
-                    Toast.makeText(getActivity(), "录像暂停",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "录像暂停", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getActivity(), "录像恢复",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "录像恢复", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -152,45 +160,37 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
 
     /**
      * 这个buffer对象在回调结束之后会变无效.所以不可以把它保存下来用.如果需要保存,必须要创建新buffer,并拷贝数据.
+     *
      * @param buffer
      */
     @Override
-    public void onI420Data(ByteBuffer buffer) {
+    public void onI420Data(final ByteBuffer buffer) {
         Log.i(TAG, "I420 data length :" + buffer.capacity());
 
 //        writeToFile("/sdcard/tmp.yuv", buffer);
+
+//        if (i++ == 10) {
+//            i = 0;
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    saveImage(buffer);
+//                }
+//            }).start();
+//        }
     }
 
     @Override
     public void onPcmData(byte[] pcm) {
         Log.i(TAG, "pcm data length :" + pcm.length);
 
-//        save2path(pcm, 0, pcm.length,path + "/" + "audio.pcm", true);
+//        Client.save2path(pcm, 0, pcm.length,path + "/" + "audio.pcm", true);
     }
 
-//    private String path = Environment.getExternalStorageDirectory() +"/EasyPlayerRTSP";
+//    int i = 0;
+//    private String path = Environment.getExternalStorageDirectory() + "/EasyPlayerRTSP";
 //
-//    private static void save2path(byte[] buffer, int offset, int length, String path, boolean append) {
-//        FileOutputStream fos = null;
-//        try {
-//            fos = new FileOutputStream(path, append);
-//            fos.write(buffer, offset, length);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (fos != null) {
-//                try {
-//                    fos.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-//
-//    private void writeToFile(String path, ByteBuffer buffer){
+//    private void writeToFile(String path, ByteBuffer buffer) {
 //        try {
 //            FileOutputStream fos = new FileOutputStream(path, true);
 //            byte[] in = new byte[buffer.capacity()];
@@ -198,8 +198,35 @@ public class YUVExportFragment extends PlayFragment implements EasyPlayerClient.
 //            buffer.get(in);
 //            fos.write(in);
 //            fos.close();
-//        }catch (Exception ex){
+//        } catch (Exception ex) {
 //            ex.printStackTrace();
+//        }
+//    }
+//
+//    private void saveImage(ByteBuffer buffer) {
+//        byte[] in = new byte[buffer.capacity()];
+//        buffer.clear();
+//        buffer.get(in);
+//
+//        byte[] dst = new byte[buffer.capacity()];
+//        JNIUtil.ConvertFromI420(in, dst, mWidth, mHeight, 2);
+//
+//        FileOutputStream outStream;
+//        try {
+//            YuvImage yuvimage = new YuvImage(dst, ImageFormat.NV21, mWidth, mHeight, null);
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            yuvimage.compressToJpeg(new Rect(0, 0, mWidth, mHeight), 80, baos);
+//
+//            outStream = new FileOutputStream(String.format(path + "/%d.jpg", System.currentTimeMillis()));
+//            outStream.write(baos.toByteArray());
+//            outStream.flush();
+//            outStream.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//
 //        }
 //    }
 }
