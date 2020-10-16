@@ -1580,12 +1580,12 @@ public class EasyPlayerClient implements Client.SourceCallBack {
                 }
 
             }
-//            Log.d(TAG, String.format("queue size :%d", mQueue.size()));
-//            try {
-//                mQueue.put(frameInfo);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            Log.d(TAG, String.format("queue size :%d", mQueue.size()));
+            try {
+                mQueue.put(frameInfo);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else if (_frameType == 0) {
             // time out...
             if (!mTimeout) {
