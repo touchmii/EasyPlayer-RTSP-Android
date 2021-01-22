@@ -69,6 +69,8 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
     private ActivityPlayListBinding mBinding;
     private RecyclerView mRecyclerView;
     private EditText edit;
+    private EditText mqtt_address_edit;
+    private EditText mqtt_topic_edit;
 
     private Cursor mCursor;
 
@@ -95,9 +97,11 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
         mCursor = TheApp.sDB.query(VideoSource.TABLE_NAME, null, null, null, null, null, null);
         if (!mCursor.moveToFirst()) {
             ContentValues cv = new ContentValues();
-            cv.put(VideoSource.URL, "rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov");
+            cv.put(VideoSource.URL, "rtsp://admin:KZVOAZ@lvsrobot.cn:22554/h2641/sub/av_stream");
             cv.put(VideoSource.TRANSPORT_MODE, VideoSource.TRANSPORT_MODE_TCP);
-            cv.put(VideoSource.SEND_OPTION, VideoSource.SEND_OPTION_TRUE);
+            cv.put(VideoSource.SEND_OPTION, VideoSource.SEND_OPTION_FALSE);
+            cv.put(VideoSource.MQTT_ADDRESS, "lvsrobot.cn");
+            cv.put(VideoSource.MQTT_TOPIC, "/homee/car");
 
             TheApp.sDB.insert(VideoSource.TABLE_NAME, null, cv);
 
@@ -236,6 +240,8 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
             String playUrl = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
             int sendOption = mCursor.getInt(mCursor.getColumnIndex(VideoSource.SEND_OPTION));
             int transportMode = mCursor.getInt(mCursor.getColumnIndex(VideoSource.TRANSPORT_MODE));
+            String mqtt_url = mCursor.getString(mCursor.getColumnIndex(VideoSource.MQTT_ADDRESS));
+            String mqtt_topic = mCursor.getString(mCursor.getColumnIndex(VideoSource.MQTT_TOPIC));
 
             if (!TextUtils.isEmpty(playUrl)) {
                 if (getIntent().getBooleanExtra(EXTRA_BOOLEAN_SELECT_ITEM_TO_PLAY, false)) {
@@ -257,6 +263,8 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                         i.putExtra("play_url", playUrl);
                         i.putExtra(VideoSource.SEND_OPTION, sendOption);
                         i.putExtra(VideoSource.TRANSPORT_MODE, transportMode);
+                        i.putExtra(VideoSource.MQTT_ADDRESS, mqtt_url);
+                        i.putExtra(VideoSource.MQTT_TOPIC, mqtt_topic);
                         mPos = pos;
                         ActivityCompat.startActivityForResult(this, i, REQUEST_PLAY, ActivityOptionsCompat.makeSceneTransitionAnimation(this, holder.mImageView, "video_animation").toBundle());
                     }
@@ -315,16 +323,24 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
 
     private void displayDialog(final int pos) {
         String url = "rtsp://";
+        String mqtt_url = "";
+        String mqtt_topic = "/home";
 
         View view = getLayoutInflater().inflate(R.layout.new_media_source_dialog, null);
         final CheckBox sendOption = view.findViewById(R.id.send_option);
         final RadioGroup transportMode = view.findViewById(R.id.transport_mode);
         final RadioButton transportTcp = view.findViewById(R.id.transport_tcp);
         edit = view.findViewById(R.id.new_media_source_url);
+        mqtt_address_edit = view.findViewById(R.id.mqtt_address_url);
+        mqtt_topic_edit = view.findViewById(R.id.mqtt_topic_url);
+
 
         if (pos > -1) {
             mCursor.moveToPosition(pos);
             url = mCursor.getString(mCursor.getColumnIndex(VideoSource.URL));
+            mqtt_url = mCursor.getString((mCursor.getColumnIndex(VideoSource.MQTT_ADDRESS)));
+            mqtt_topic = mCursor.getString((mCursor.getColumnIndex(VideoSource.MQTT_TOPIC)));
+
 
             final int sendOptionValue = mCursor.getInt(mCursor.getColumnIndex(VideoSource.SEND_OPTION));
             if (sendOptionValue == VideoSource.SEND_OPTION_TRUE) {
@@ -344,6 +360,9 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
         edit.setHint("RTSP://...");
         edit.setText(url);
         edit.setSelection(url.length());
+
+        mqtt_address_edit.setText(mqtt_url);
+        mqtt_topic_edit.setText(mqtt_topic);
 
         // 去扫描二维码
         final ImageButton btn = view.findViewById(R.id.new_media_scan);
@@ -367,6 +386,8 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String url = String.valueOf(edit.getText());
+                        String mqtt_url = String.valueOf(mqtt_address_edit.getText());
+                        String mqtt_topic = String.valueOf(mqtt_topic_edit.getText());
 
                         if (TextUtils.isEmpty(url)) {
                             return;
@@ -376,6 +397,10 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                             Toast.makeText(PlayListActivity.this,"不是合法的RTSP地址，请重新添加.",Toast.LENGTH_SHORT).show();
                             return;
                         }
+
+//                        if (mqtt_url.toLowerCase().indexOf("mqtt://") != 0) {
+//                            Toast.makeText(PlayListActivity.this, "不是合法的MQTT地址,请重新添加.", Toast.LENGTH_SHORT).show();
+//                        }
 
                         ContentValues cv = new ContentValues();
                         cv.put(VideoSource.URL, url);
@@ -387,6 +412,9 @@ public class PlayListActivity extends AppCompatActivity implements View.OnClickL
                         }
 
                         cv.put(VideoSource.SEND_OPTION, sendOption.isChecked() ? VideoSource.SEND_OPTION_TRUE : VideoSource.SEND_OPTION_FALSE);
+
+                        cv.put(VideoSource.MQTT_ADDRESS, mqtt_url);
+                        cv.put(VideoSource.MQTT_TOPIC, mqtt_topic);
 
                         if (pos > -1) {
                             final int _id = mCursor.getInt(mCursor.getColumnIndex(VideoSource._ID));

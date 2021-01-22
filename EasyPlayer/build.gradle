@@ -5,7 +5,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "org.easydarwin.easyplayer"
+        applicationId "com.lvsrobot.easyrtspplayer"
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 14201211
@@ -16,7 +16,8 @@ android {
 
         ndk {
             //设置支持的SO库架构
-            abiFilters 'armeabi', 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+//            abiFilters 'armeabi', 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+            abiFilters 'armeabi', 'arm64-v8a'
         }
     }
 
@@ -83,4 +84,6 @@ dependencies {
     implementation 'com.tencent.bugly:nativecrashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.2.0
 
     implementation 'com.budiyev.android:code-scanner:1.9.4'
+
+    implementation 'io.github.controlwear:virtualjoystick:1.10.1'
 }

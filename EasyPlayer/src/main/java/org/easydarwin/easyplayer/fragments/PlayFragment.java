@@ -367,6 +367,7 @@ public class PlayFragment extends Fragment implements TextureView.SurfaceTexture
                     mType < 2 ? Client.TRANSTYPE_TCP : Client.TRANSTYPE_UDP,
                     sendOption,
                     Client.EASY_SDK_VIDEO_FRAME_FLAG | Client.EASY_SDK_AUDIO_FRAME_FLAG,
+//                    Client.EASY_SDK_VIDEO_FRAME_FLAG,
                     "",
                     "",
                     autoRecord ? FileUtil.getMovieName(mUrl).getPath() : null);

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        applicationId "org.easydarwin.easyplayer"
+        applicationId "com.lvsrobot.easyplayer"
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 1

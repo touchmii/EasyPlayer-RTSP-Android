@@ -24,6 +24,8 @@ public class VideoSource implements BaseColumns {
 
     public static final int TRANSPORT_MODE_TCP = 1;
     public static final int TRANSPORT_MODE_UDP = 2;
+    public static final String MQTT_ADDRESS = "mqtt_url";
+    public static final String MQTT_TOPIC = "mqtt_topic";
 
     public static void createTable(SQLiteDatabase db) {
         db.execSQL(String.format("CREATE TABLE IF NOT EXISTS %s (" +
@@ -33,7 +35,9 @@ public class VideoSource implements BaseColumns {
                         "%s VARCHAR(256) NOT NULL DEFAULT '', " +
                         "%s integer DEFAULT 0, " +
                         "%s integer DEFAULT 1, " +
-                        "%s integer DEFAULT 0 " +
+                        "%s integer DEFAULT 0, " +
+                        "%s VARCHAR(256) NOT NULL DEFAULT '', " +
+                        "%s VARCHAR(256) NOT NULL DEFAULT '' " +
                         ")",
                 TABLE_NAME,
                 _ID,
@@ -42,7 +46,9 @@ public class VideoSource implements BaseColumns {
                 NAME,
                 AUDIENCE_NUMBER,
                 TRANSPORT_MODE,
-                SEND_OPTION));
+                SEND_OPTION,
+                MQTT_ADDRESS,
+                MQTT_TOPIC));
     }
 
 }

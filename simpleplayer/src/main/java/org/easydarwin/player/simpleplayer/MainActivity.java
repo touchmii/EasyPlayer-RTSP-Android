@@ -34,22 +34,24 @@ public class MainActivity extends AppCompatActivity {
         et.setHint("请输入RTSP地址");
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         et.setText(sp.getString("url",null));
-
-        new AlertDialog.Builder(this).setView(et).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String url = et.getText().toString();
-                if (!TextUtils.isEmpty(url)){
-                    client.play(url);
-                    sp.edit().putString("url", url).apply();
-                }
-            }
-        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        }).show();
+        String url = "rtsp://admin:KZVOAZ@192.168.0.19:554/h2641/sub/av_stream";
+        client.play(url);
+//        new AlertDialog.Builder(this).setView(et).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                String url = et.getText().toString();
+//                //String url = "rtsp://admin:KZVOAZ@192.168.0.19:554/h2641/sub/av_stream"
+//                if (!TextUtils.isEmpty(url)){
+//                    client.play(url);
+//                    sp.edit().putString("url", url).apply();
+//                }
+//            }
+//        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                finish();
+//            }
+//        }).show();
 
     }
 }

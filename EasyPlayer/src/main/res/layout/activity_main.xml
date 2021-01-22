@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -153,6 +154,102 @@
                 android:scrollbars = "vertical"
                 android:layout_height="match_parent" />
         </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            tools:context="io.github.controlwear.joystickdemo.MainActivity"
+
+            <io.github.controlwear.virtual.joystick.android.JoystickView
+                android:id="@+id/joystickView_left"
+                android:layout_width="208dp"
+                android:layout_height="220dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="32dp"
+                android:layout_marginLeft="32dp"
+                android:layout_marginTop="106dp"
+                android:layout_marginRight="171dp"
+                android:layout_marginBottom="19dp"
+                custom:JV_backgroundColor="#B3B6B6"
+                custom:JV_borderColor="#686767"
+                custom:JV_borderWidth="4dp"
+                custom:JV_buttonColor="#4CAF50" />
+
+            <Button
+                android:id="@+id/liftupButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="144dp"
+                android:layout_marginEnd="29dp"
+                android:text="上升" />
+
+            <Button
+                android:id="@+id/liftdownButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="27dp"
+                android:layout_marginBottom="74dp"
+                android:text="下降" />
+
+            <Button
+                android:id="@+id/emergencyButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="72dp"
+                android:layout_marginEnd="29dp"
+                android:text="停止" />
+
+            <Button
+                android:id="@+id/connectButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="133dp"
+                android:layout_marginTop="28dp"
+                android:text="连接" />
+
+            <TextView
+                android:id="@+id/textView_angle_left"
+                android:layout_width="28dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="59dp"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/textView_strength_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="29dp"
+                android:layout_marginTop="85dp"
+                android:text="0%" />
+
+            <TextView
+                android:id="@+id/connectionStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="149dp"
+                android:layout_marginTop="83dp"
+                android:text="connction" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 </layout>

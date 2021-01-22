@@ -27,9 +27,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.easydarwin.easyplayer.R;
 import org.easydarwin.easyplayer.data.VideoSource;
@@ -39,8 +42,19 @@ import org.easydarwin.easyplayer.fragments.PlayFragment;
 import org.easydarwin.easyplayer.util.FileUtil;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import mqttjoystickcontroller.JoystickClass;
+import mqttjoystickcontroller.MQTTManager;
+
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttException;
+
+import android.provider.Settings.Secure;
+
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
@@ -55,6 +69,8 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
 
     private SoundPool mSoundPool;
     private String url;
+    private String mqtt_url;
+    private String mqtt_topic;
 
     private int mTalkPictureSound;
     //    private int mActionStartSound;
@@ -67,6 +83,8 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
     private long mLastReceivedLength;
 
     private final Handler mHandler = new Handler();
+
+
 
     private final Runnable mTimerRunnable = new Runnable() {
         @Override
@@ -97,6 +115,23 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
         }
     };
 
+    private Button connectButton;
+    private Button stopButton;
+    private TextView connectionStatus;
+    private EditText brokerAddress;
+    private Button liftupButton;
+    private Button liftdownButton;
+
+    private MQTTManager mqttManager;
+    private JoystickClass joystickClass;
+
+    //private String android_id = Secure.getString(getContentResolver(),Secure.ANDROID_ID);
+
+
+
+
+    private String android_id = android.os.Build.SERIAL;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +143,8 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
         }
 
         url = getIntent().getStringExtra("play_url");
+        mqtt_url = getIntent().getStringExtra(VideoSource.MQTT_ADDRESS);
+        mqtt_topic = getIntent().getStringExtra(VideoSource.MQTT_TOPIC);
         int transportMode = getIntent().getIntExtra(VideoSource.TRANSPORT_MODE, 0);
         int sendOption = getIntent().getIntExtra(VideoSource.SEND_OPTION, 0);
         if (TextUtils.isEmpty(url)) {
@@ -172,6 +209,9 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
         });
 
         mBinding.liveVideoBarEnableAudio.setEnabled(false);
+//        boolean enable = mRenderFragment.toggleAudioEnable();
+
+
         mBinding.liveVideoBarTakePicture.setEnabled(false);
         mBinding.liveVideoBarRecord.setEnabled(false);
 
@@ -183,7 +223,102 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
         } else {
             vertical();
         }
+
+//        setContentView(R.layout.activity_main);
+        this.connectButton  = (Button) findViewById(R.id.connectButton);
+        this.stopButton     = (Button) findViewById(R.id.emergencyButton);
+//        this.brokerAddress  = (EditText) findViewById(R.id.brokerText);
+//        this.topic          = (EditText) findViewById(R.id.topicText);
+        this.connectionStatus = (TextView) findViewById(R.id.connectionStatus);
+//        this.username       = (EditText) findViewById(R.id.username);
+//        this.password       = (EditText) findViewById(R.id.password);
+
+        this.liftupButton   = (Button) findViewById(R.id.liftupButton);
+        this.liftdownButton = (Button) findViewById(R.id.liftdownButton);
+
+        this.mqttManager    = new MQTTManager(mqtt_url,this, android_id);
+        this.joystickClass  = new JoystickClass(this);
+
+
+
+        final PlayActivity activity = this;
+        final TextView tmpStatus = this.connectionStatus;
+
+        this.connectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                if (!activity.brokerAddress.getText().toString().isEmpty()){
+//                    mqttManager = new MQTTManager(brokerAddress.getText().toString(), activity);
+//                    mqttManager = new MQTTManager("lvsrobot.cn", activity, android_id);
+//                }else {
+//                    mqttManager = new MQTTManager(activity);
+//                    activity.brokerAddress.setText(mqttManager.getUserBrokerAddress());
+//                }
+//                if (!activity.username.getText().toString().isEmpty() && !activity.password.getText().toString().isEmpty()){
+//                    mqttManager.getMqttConnectOptions().setUserName(getUsername());
+//                    mqttManager.getMqttConnectOptions().setPassword(getPassword().toCharArray());
+//                }
+                if(mqttManager.getMqttClient().isConnected()) {
+                    try {
+                        mqttManager.getMqttClient().disconnect();
+                        connectButton.setText("连接");
+                        tmpStatus.setText("disconnect");
+                        tmpStatus.setTextColor(Color.YELLOW);
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        mqttManager.getMqttClient().connect(mqttManager.getMqttConnectOptions(), null, new IMqttActionListener() {
+                            @Override
+                            public void onSuccess(IMqttToken iMqttToken) {
+                                tmpStatus.setText("Connected");
+                                tmpStatus.setTextColor(Color.GREEN);
+                                connectButton.setText("断开");
+                            }
+
+                            @Override
+                            public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
+                                tmpStatus.setText("Failed");
+                                tmpStatus.setTextColor(Color.RED);
+                                throwable.printStackTrace();
+                                System.out.println(throwable.getMessage());
+                            }
+                        });
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
+
+
+        this.stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mqttManager.sendMessage("STOP",mqtt_topic);
+            }
+        });
+
+        this.liftupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mqttManager.sendMessage("up", mqtt_topic+"/lift");
+            }
+        });
+        this.liftdownButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mqttManager.sendMessage("down", mqtt_topic+"/lift");
+            }
+        });
     }
+
+    public MQTTManager getMqttManager() { return this.mqttManager;}
+
+    public String getTopic() { return mqtt_topic;}
 
     @Override
     protected void onDestroy() {
@@ -395,10 +530,12 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
     }
 
     private void onPlayStart() {
-        boolean enable = mRenderFragment.isAudioEnable();
+        boolean enable = mRenderFragment.toggleAudioEnable();
+        //视频开始播放后才能关闭音频
+        enable = mRenderFragment.isAudioEnable();
         mBinding.liveVideoBarEnableAudio.setImageState(enable ? new int[]{android.R.attr.state_pressed} : new int[]{}, true);
         mBinding.liveVideoBarEnableAudio.setEnabled(true);
-        mHandler.postDelayed(mTimerRunnable, 1000);
+        mHandler.postDelayed(mTimerRunnable, 200);
 
         mBinding.liveVideoBarTakePicture.setEnabled(false);
         mBinding.liveVideoBarRecord.setEnabled(false);

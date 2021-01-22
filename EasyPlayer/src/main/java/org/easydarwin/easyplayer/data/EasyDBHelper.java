@@ -36,6 +36,8 @@ public class EasyDBHelper extends SQLiteOpenHelper {
             cv.put(VideoSource.SEND_OPTION, 0);
             cv.put(VideoSource.TRANSPORT_MODE, 0);
             cv.put(VideoSource.AUDIENCE_NUMBER, 0);
+            cv.put(VideoSource.MQTT_ADDRESS, cursor.getString(cursor.getColumnIndex(VideoSource.MQTT_ADDRESS)));
+            cv.put(VideoSource.MQTT_TOPIC, cursor.getString(cursor.getColumnIndex(VideoSource.MQTT_TOPIC)));
             cvs.add(cv);
         }
 
