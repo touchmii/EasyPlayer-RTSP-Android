@@ -56,6 +56,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import android.provider.Settings.Secure;
 
 
+import com.pgyer.pgyersdk.PgyerSDKManager;
+import com.pgyersdk.crash.PgyCrashManager;
+
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 /**
@@ -266,6 +269,8 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
                         tmpStatus.setTextColor(Color.YELLOW);
                     } catch (MqttException e) {
                         e.printStackTrace();
+//                        PgyCrashManager.reportCaughtException(e);
+                        PgyerSDKManager.reportException(e);
                     }
                 } else {
                     try {
@@ -287,6 +292,8 @@ public class PlayActivity extends AppCompatActivity implements PlayFragment.OnDo
                         });
                     } catch (MqttException e) {
                         e.printStackTrace();
+//                        PgyCrashManager.reportCaughtException(e);
+                        PgyerSDKManager.reportException(e);
                     }
 
                 }

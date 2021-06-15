@@ -5,6 +5,9 @@ package mqttjoystickcontroller;
 
 import android.content.Context;
 
+import com.pgyer.pgyersdk.PgyerSDKManager;
+import com.pgyersdk.crash.PgyCrashManager;
+
 import org.easydarwin.easyplayer.activity.PlayActivity;
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -97,6 +100,8 @@ public class MQTTManager {
             e.printStackTrace();
         } catch (MqttException e) {
             e.printStackTrace();
+//            PgyCrashManager.reportCaughtException(e);
+            PgyerSDKManager.reportException(e);
         }
     }
 

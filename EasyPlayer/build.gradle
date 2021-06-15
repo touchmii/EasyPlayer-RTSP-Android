@@ -12,12 +12,12 @@ android {
         versionName "1.4.20.1211"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField 'boolean', 'YUV_EXPORT', 'false'
-        buildConfigField 'String', 'RTSP_KEY', '\"6D75724D7A4A36526D34304132635A666F446B6D70655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C2F32566863336B3D\"'
+        buildConfigField 'String', 'RTSP_KEY', '\"6D75724D7A4A36526D343041445756676E35727970655A76636D63755A57467A65575268636E64706269356C59584E356347786865575679567778576F502B6C2F69426C59584E35\"'
 
         ndk {
             //设置支持的SO库架构
-//            abiFilters 'armeabi', 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
-            abiFilters 'armeabi', 'arm64-v8a'
+            abiFilters 'armeabi', 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+//            abiFilters 'armeabi', 'arm64-v8a'
         }
     }
 
@@ -51,6 +51,8 @@ repositories {
     }
     mavenCentral()
     google()
+//    maven { url "https://raw.githubusercontent.com/happychain/helpshop/master" } //主力仓库
+    maven { url "https://raw.githubusercontent.com/Pgyer/analytics/master" }
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -80,10 +82,14 @@ dependencies {
     androidTestImplementation "com.android.support.test:rules:0.5"
     androidTestImplementation 'junit:junit:4.12'
 
-    implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.2.0
-    implementation 'com.tencent.bugly:nativecrashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.2.0
+//    implementation 'com.tencent.bugly:crashreport_upgrade:1.5.23'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.2.0
+//    implementation 'com.tencent.bugly:nativecrashreport:3.8.0' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.2.0
 
     implementation 'com.budiyev.android:code-scanner:1.9.4'
 
     implementation 'io.github.controlwear:virtualjoystick:1.10.1'
+    implementation 'com.andretietz.android:gamecontroller:1.1.1'
+//    implementation 'com.pgyersdk:sdk:3.0.10'
+//    implementation 'com.pgyer:analytics:4.2.0'
+    implementation files('libs/jar_4_2_0.jar')
 }

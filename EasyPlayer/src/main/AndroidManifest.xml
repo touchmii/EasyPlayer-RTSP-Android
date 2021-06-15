@@ -16,6 +16,7 @@
 
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    
 
     <application
         android:name=".TheApp"
@@ -25,6 +26,33 @@
         tools:replace="android:label"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+<!--        tools:replace="android:resource"-->
+<!--        tools:replace="android:authorities"-->
+<!--        tools:replace="android:name,android:authorities,android:exported,android:resource">-->
+<!--        <meta-data-->
+<!--            android:name="android.support.FILE_PROVIDER_PATHS"-->
+<!--            tools:replace="android:resource"-->
+<!--            android:resource="@xml/provider_paths" />-->
+
+        <meta-data
+            android:name="PGYER_APPID"
+            android:value="84a4fe355898a9895c3b182c1e5ecd35"
+            />
+        <meta-data
+            android:name="PGYER_API_KEY"
+            android:value="6c1953a7321d4d49611957ef1aa7e172"></meta-data>
+        <meta-data
+            android:name="PGYER_FRONTJS_KEY"
+            android:value="e47e7c1cc3e4724dbd4980d918396d1a"></meta-data>
+
+        <!-- 渠道 -->
+        <meta-data
+            android:name="PGYER_CHALNNEL_KEY"
+            android:value=""/>
+        <!-- 添加新版本检测 -->
+        <meta-data
+            android:name="PGYER_FEATURE_CHECK_UNPDATE"
+            android:value="true" />
 
         <meta-data
             android:name="UMENG_APPKEY"

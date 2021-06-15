@@ -249,6 +249,16 @@
                 android:layout_marginTop="83dp"
                 android:text="connction" />
 
+            <TextView
+                android:id="@+id/gamepad_con"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="26dp"
+                android:layout_marginEnd="44dp"
+                android:text="手柄未连接" />
+
         </RelativeLayout>
 
     </LinearLayout>
