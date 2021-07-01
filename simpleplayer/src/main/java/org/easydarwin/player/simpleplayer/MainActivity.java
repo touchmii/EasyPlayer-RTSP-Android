@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         et.setHint("请输入RTSP地址");
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         et.setText(sp.getString("url",null));
+//        String url = "rtsp://admin:KZVOAZ@192.168.0.19:554/h2641/sub/av_stream";
         String url = "rtsp://admin:KZVOAZ@192.168.0.19:554/h2641/sub/av_stream";
         client.play(url);
 //        new AlertDialog.Builder(this).setView(et).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
