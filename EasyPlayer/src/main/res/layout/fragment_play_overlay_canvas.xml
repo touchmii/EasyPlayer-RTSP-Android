@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <org.easydarwin.easyplayer.views.OverlayCanvasView
+    <com.lvsrobot.easyplayer.views.OverlayCanvasView
         android:id="@+id/overlay_canvas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
-    <org.easydarwin.easyplayer.views.AngleView
+    <com.lvsrobot.easyplayer.views.AngleView
         android:id="@+id/render_angle_view"
         android:layout_width="100dp"
         android:layout_height="50dp"

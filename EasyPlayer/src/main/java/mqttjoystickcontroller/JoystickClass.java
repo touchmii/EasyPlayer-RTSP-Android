@@ -7,8 +7,8 @@ import android.widget.TextView;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 //import mqtt_controller.application.R;
-import org.easydarwin.easyplayer.R;
-import org.easydarwin.easyplayer.activity.PlayActivity;
+import com.lvsrobot.easyplayer.R;
+import com.lvsrobot.easyplayer.activity.PlayActivity;
 
 
 public class JoystickClass {

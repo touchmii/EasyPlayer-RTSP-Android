@@ -20,7 +20,7 @@
         android:gravity="center"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        android:text="EasyPlayer RTSP" />
+        android:text="Remote Controller" />
 
     <TextView
         android:id="@+id/txt_copyright"
@@ -32,7 +32,7 @@
         android:gravity="center"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
-        android:text="Copyright @ Open.TSINGSEE.com" />
+        android:text="Copyright @ lvsrobot.com" />
 
     <TextView
         android:id="@+id/txt_version"
@@ -43,7 +43,7 @@
         android:layout_centerHorizontal="true"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
-        android:text="EasyPlayer 1.0.0" />
+        android:text="Remote Controller 1.0.0" />
 
 
 

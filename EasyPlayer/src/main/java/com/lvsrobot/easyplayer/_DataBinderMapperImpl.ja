@@ -1,0 +1,202 @@
+package com.lvsrobot.easyplayer;
+
+import android.databinding.DataBinderMapper;
+import android.databinding.DataBindingComponent;
+import android.databinding.ViewDataBinding;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
+import android.view.View;
+import java.lang.IllegalArgumentException;
+import java.lang.Integer;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.RuntimeException;
+import java.lang.String;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import com.lvsrobot.easyplayer.databinding.ActivityAboutBindingImpl;
+import com.lvsrobot.easyplayer.databinding.ActivityMainBindingImpl;
+import com.lvsrobot.easyplayer.databinding.ActivityMediaFilesBindingImpl;
+import com.lvsrobot.easyplayer.databinding.ActivityPlayListBindingImpl;
+import com.lvsrobot.easyplayer.databinding.ActivitySettingBindingImpl;
+import com.lvsrobot.easyplayer.databinding.FragmentImageBindingImpl;
+import com.lvsrobot.easyplayer.databinding.FragmentMediaFileBindingImpl;
+import com.lvsrobot.easyplayer.databinding.ImagePickerItemBindingImpl;
+import com.lvsrobot.easyplayer.databinding.VideoSourceItemBindingImpl;
+import com.lvsrobot.easyplayer.databinding.YuvExportActivityBindingImpl;
+
+public class _DataBinderMapperImpl extends DataBinderMapper {
+  private static final int LAYOUT_ACTIVITYABOUT = 1;
+
+  private static final int LAYOUT_ACTIVITYMAIN = 2;
+
+  private static final int LAYOUT_ACTIVITYMEDIAFILES = 3;
+
+  private static final int LAYOUT_ACTIVITYPLAYLIST = 4;
+
+  private static final int LAYOUT_ACTIVITYSETTING = 5;
+
+  private static final int LAYOUT_FRAGMENTIMAGE = 6;
+
+  private static final int LAYOUT_FRAGMENTMEDIAFILE = 7;
+
+  private static final int LAYOUT_IMAGEPICKERITEM = 8;
+
+  private static final int LAYOUT_VIDEOSOURCEITEM = 9;
+
+  private static final int LAYOUT_YUVEXPORTACTIVITY = 10;
+
+  private static final SparseIntArray INTERNAL_LAYOUT_ID_LOOKUP = new SparseIntArray(10);
+
+  static {
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.activity_about, LAYOUT_ACTIVITYABOUT);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.activity_main, LAYOUT_ACTIVITYMAIN);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.activity_media_files, LAYOUT_ACTIVITYMEDIAFILES);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.activity_play_list, LAYOUT_ACTIVITYPLAYLIST);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.activity_setting, LAYOUT_ACTIVITYSETTING);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.fragment_image, LAYOUT_FRAGMENTIMAGE);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.fragment_media_file, LAYOUT_FRAGMENTMEDIAFILE);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.image_picker_item, LAYOUT_IMAGEPICKERITEM);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.video_source_item, LAYOUT_VIDEOSOURCEITEM);
+    INTERNAL_LAYOUT_ID_LOOKUP.put(com.lvsrobot.easyplayer.R.layout.yuv_export_activity, LAYOUT_YUVEXPORTACTIVITY);
+  }
+
+  @Override
+  public ViewDataBinding getDataBinder(DataBindingComponent component, View view, int layoutId) {
+    int localizedLayoutId = INTERNAL_LAYOUT_ID_LOOKUP.get(layoutId);
+    if(localizedLayoutId > 0) {
+      final Object tag = view.getTag();
+      if(tag == null) {
+        throw new RuntimeException("view must have a tag");
+      }
+      switch(localizedLayoutId) {
+        case  LAYOUT_ACTIVITYABOUT: {
+          if ("layout/activity_about_0".equals(tag)) {
+            return new ActivityAboutBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for activity_about is invalid. Received: " + tag);
+        }
+        case  LAYOUT_ACTIVITYMAIN: {
+          if ("layout/activity_main_0".equals(tag)) {
+            return new ActivityMainBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for activity_main is invalid. Received: " + tag);
+        }
+        case  LAYOUT_ACTIVITYMEDIAFILES: {
+          if ("layout/activity_media_files_0".equals(tag)) {
+            return new ActivityMediaFilesBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for activity_media_files is invalid. Received: " + tag);
+        }
+        case  LAYOUT_ACTIVITYPLAYLIST: {
+          if ("layout/activity_play_list_0".equals(tag)) {
+            return new ActivityPlayListBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for activity_play_list is invalid. Received: " + tag);
+        }
+        case  LAYOUT_ACTIVITYSETTING: {
+          if ("layout/activity_setting_0".equals(tag)) {
+            return new ActivitySettingBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for activity_setting is invalid. Received: " + tag);
+        }
+        case  LAYOUT_FRAGMENTIMAGE: {
+          if ("layout/fragment_image_0".equals(tag)) {
+            return new FragmentImageBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for fragment_image is invalid. Received: " + tag);
+        }
+        case  LAYOUT_FRAGMENTMEDIAFILE: {
+          if ("layout/fragment_media_file_0".equals(tag)) {
+            return new FragmentMediaFileBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for fragment_media_file is invalid. Received: " + tag);
+        }
+        case  LAYOUT_IMAGEPICKERITEM: {
+          if ("layout/image_picker_item_0".equals(tag)) {
+            return new ImagePickerItemBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for image_picker_item is invalid. Received: " + tag);
+        }
+        case  LAYOUT_VIDEOSOURCEITEM: {
+          if ("layout/video_source_item_0".equals(tag)) {
+            return new VideoSourceItemBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for video_source_item is invalid. Received: " + tag);
+        }
+        case  LAYOUT_YUVEXPORTACTIVITY: {
+          if ("layout/yuv_export_activity_0".equals(tag)) {
+            return new YuvExportActivityBindingImpl(component, view);
+          }
+          throw new IllegalArgumentException("The tag for yuv_export_activity is invalid. Received: " + tag);
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public ViewDataBinding getDataBinder(DataBindingComponent component, View[] views, int layoutId) {
+    if(views == null || views.length == 0) {
+      return null;
+    }
+    int localizedLayoutId = INTERNAL_LAYOUT_ID_LOOKUP.get(layoutId);
+    if(localizedLayoutId > 0) {
+      final Object tag = views[0].getTag();
+      if(tag == null) {
+        throw new RuntimeException("view must have a tag");
+      }
+      switch(localizedLayoutId) {
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public int getLayoutId(String tag) {
+    if (tag == null) {
+      return 0;
+    }
+    Integer tmpVal = InnerLayoutIdLookup.sKeys.get(tag);
+    return tmpVal == null ? 0 : tmpVal;
+  }
+
+  @Override
+  public String convertBrIdToString(int localId) {
+    String tmpVal = InnerBrLookup.sKeys.get(localId);
+    return tmpVal;
+  }
+
+  @Override
+  public List<DataBinderMapper> collectDependencies() {
+    ArrayList<DataBinderMapper> result = new ArrayList<DataBinderMapper>(1);
+    result.add(new com.android.databinding.library.baseAdapters.DataBinderMapperImpl());
+    return result;
+  }
+
+  private static class InnerBrLookup {
+    static final SparseArray<String> sKeys = new SparseArray<String>(2);
+
+    static {
+      sKeys.put(0, "_all");
+    }
+  }
+
+  private static class InnerLayoutIdLookup {
+    static final HashMap<String, Integer> sKeys = new HashMap<String, Integer>(10);
+
+    static {
+      sKeys.put("layout/activity_about_0", com.lvsrobot.easyplayer.R.layout.activity_about);
+      sKeys.put("layout/activity_main_0", com.lvsrobot.easyplayer.R.layout.activity_main);
+      sKeys.put("layout/activity_media_files_0", com.lvsrobot.easyplayer.R.layout.activity_media_files);
+      sKeys.put("layout/activity_play_list_0", com.lvsrobot.easyplayer.R.layout.activity_play_list);
+      sKeys.put("layout/activity_setting_0", com.lvsrobot.easyplayer.R.layout.activity_setting);
+      sKeys.put("layout/fragment_image_0", com.lvsrobot.easyplayer.R.layout.fragment_image);
+      sKeys.put("layout/fragment_media_file_0", com.lvsrobot.easyplayer.R.layout.fragment_media_file);
+      sKeys.put("layout/image_picker_item_0", com.lvsrobot.easyplayer.R.layout.image_picker_item);
+      sKeys.put("layout/video_source_item_0", com.lvsrobot.easyplayer.R.layout.video_source_item);
+      sKeys.put("layout/yuv_export_activity_0", com.lvsrobot.easyplayer.R.layout.yuv_export_activity);
+    }
+  }
+}

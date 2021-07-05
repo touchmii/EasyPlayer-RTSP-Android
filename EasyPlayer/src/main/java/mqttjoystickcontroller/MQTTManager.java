@@ -6,9 +6,8 @@ package mqttjoystickcontroller;
 import android.content.Context;
 
 import com.pgyer.pgyersdk.PgyerSDKManager;
-import com.pgyersdk.crash.PgyCrashManager;
 
-import org.easydarwin.easyplayer.activity.PlayActivity;
+import com.lvsrobot.easyplayer.activity.PlayActivity;
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;

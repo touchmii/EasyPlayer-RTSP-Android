@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="#ffffff"
-        tools:context="org.easydarwin.easyplayer.activity.PlayListActivity">
+        tools:context="com.lvsrobot.easyplayer.activity.PlayListActivity">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -24,7 +24,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="EasyPlayer RTSP"
+                    android:text="Remote Controller"
                     android:gravity="center"
                     android:textColor="#ffffff"
                     android:textSize="18sp"

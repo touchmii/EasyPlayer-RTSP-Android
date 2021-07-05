@@ -5,7 +5,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "com.lvsrobot.easyrtspplayer"
+        applicationId "com.lvsrobot.easyplayer"
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 14201211
@@ -86,11 +86,14 @@ dependencies {
 //    implementation 'com.tencent.bugly:crashreport_upgrade:1.5.23'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.2.0
 //    implementation 'com.tencent.bugly:nativecrashreport:3.8.0' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.2.0
 
-    implementation 'com.budiyev.android:code-scanner:1.9.4'
-
+    //implementation 'com.budiyev.androidTestImplementationoid:code-scanner:1.9.4'
+    //
     implementation 'io.github.controlwear:virtualjoystick:1.10.1'
     implementation 'com.andretietz.android:gamecontroller:1.1.1'
+    implementation group: 'com.google.zxing', name: 'core', version: '3.4.1'
+    //
 //    implementation 'com.pgyersdk:sdk:3.0.10'
 //    implementation 'com.pgyer:analytics:4.2.0'
     implementation files('libs/jar_4_2_0.jar')
+    implementation files('libs/code-scanner-1.9.4.aar')
 }
